@@ -22,7 +22,7 @@ export const usePageGuard = (requiredPermissions: string[] = []) => {
     const admin: AdminDetail = JSON.parse(stored);
 
   
-    if (admin.role === "Super Admin") return;
+    if (admin.role === "Super Admin" || admin.role === "DEVELOPER") return;
   
     
     if (requiredPermissions.length === 0) return;

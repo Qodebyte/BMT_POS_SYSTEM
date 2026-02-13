@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { AuthForm } from '@/app/components/AuthForm';
 import { verifyOtp, verifyApprovedLoginOtp, resendOtp  } from "@/app/mock/auth";
 import { toast } from 'sonner';
+import { AdminDetail } from '@/app/utils/type';
+import { getFirstAllowedPage } from '@/app/utils/getFirstAllowedPage';
 
 const otpSchema = z.object({
   otp: z.string().length(6, 'OTP must be 6 digits'),
@@ -30,71 +32,92 @@ export default function VerifyOtpForm() {
   });
 
   async function onSubmit(values: z.infer<typeof otpSchema>) {
-    setLoading(true);
-    try {
-      let response;
+  setLoading(true);
+  try {
+    let response;
 
-      if (purpose === 'login_approved') {
-        const login_attempt_id = searchParams.get('attempt_id') || '';
-
-        response = await verifyApprovedLoginOtp({
-          admin_id,
-          otp: values.otp,
-          login_attempt_id,
-        });
-      } else {
-        response = await verifyOtp({
-          admin_id,
-          otp: values.otp,
-          purpose,
-        });
-      }
-
-       const token = response.token;
-
-      if (!token) {
-        throw new Error('No token received from server');
-      }
-
-
-      localStorage.setItem('adminToken', token);
-      
-      toast.success('Verification successful! Redirecting...');
-       if (purpose === 'reset_password') {
-        router.push(`/auth/reset-password?admin_id=${admin_id}`);
-      } else {
-        router.push('/dashboard');
-      }
-
-    } catch (err: unknown) {
-      let message = 'Invalid or expired OTP';
-      let fieldError: 'otp' | null = null;
-
-      if (err instanceof Error) {
-        message = err.message;
-        
-       
-        if (message.toLowerCase().includes('otp') || 
-            message.toLowerCase().includes('invalid') || 
-            message.toLowerCase().includes('expired')) {
-          fieldError = 'otp';
-        }
-      }
-
-    
-      if (fieldError) {
-        form.setError(fieldError, { 
-          type: 'server', 
-          message 
-        });
-      }
-
-      toast.error(message);
-      console.error('OTP verification error:', err);
-    } finally {
-      setLoading(false);
+    if (purpose === 'login_approved') {
+      const login_attempt_id = searchParams.get('attempt_id') || '';
+      response = await verifyApprovedLoginOtp({
+        admin_id,
+        otp: values.otp,
+        login_attempt_id,
+      });
+    } else {
+      response = await verifyOtp({
+        admin_id,
+        otp: values.otp,
+        purpose,
+      });
     }
+
+    const token = response.token;
+    if (!token) throw new Error('No token received from server');
+
+    localStorage.setItem('adminToken', token);
+
+  
+    const adminDetailStr = localStorage.getItem('adminDetail');
+    let adminDetail: AdminDetail | null = adminDetailStr
+      ? JSON.parse(adminDetailStr)
+      : null;
+
+    if (!adminDetail) {
+      const payload = token.split('.')[1];
+      const padded = payload + '='.repeat((4 - (payload.length % 4)) % 4);
+      adminDetail = JSON.parse(atob(padded));
+      localStorage.setItem('adminDetail', JSON.stringify(adminDetail));
+    }
+
+    toast.success('Verification successful! Redirecting...');
+
+    if (purpose === 'reset_password') {
+      router.push(`/auth/reset-password?admin_id=${admin_id}`);
+      return;
+    }
+
+   
+    if (!adminDetail) {
+      throw new Error('Admin details not found after verification');
+    }
+
+    const allowedPage = getFirstAllowedPage(adminDetail);
+
+    if (!allowedPage) {
+    
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminDetail');
+      toast.error('You do not have permission to access any pages. Please contact admin.');
+      router.push('/auth/login');
+      return;
+    }
+
+    router.push(allowedPage);
+
+  } catch (err: unknown) {
+    let message = 'Invalid or expired OTP';
+    let fieldError: 'otp' | null = null;
+
+    if (err instanceof Error) {
+      message = err.message;
+      if (message.toLowerCase().includes('otp') || 
+          message.toLowerCase().includes('invalid') || 
+          message.toLowerCase().includes('expired')) {
+        fieldError = 'otp';
+      }
+    }
+
+    if (fieldError) {
+      form.setError(fieldError, { type: 'server', message });
+    }
+
+    toast.error(message);
+    console.error('OTP verification error:', err);
+  } finally {
+    setLoading(false);
   }
+}
+
 
   async function handleResend() {
     setResendLoading(true);
