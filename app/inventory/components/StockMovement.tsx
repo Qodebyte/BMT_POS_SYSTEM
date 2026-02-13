@@ -56,7 +56,7 @@ export function StockMovementTable() {
           throw new Error('No authentication token found');
         }
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5002/api';
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.bmtpossystem.com/api';
         const response = await fetch(
           `${apiUrl}/products/movements?page=${currentPage}&limit=${limit}`,
           {

@@ -22,9 +22,9 @@ export function StockAlertWidget() {
   const [loading, setLoading] = useState(true);
 
   const apiUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5002/api";
+    process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.bmtpossystem.com/api";
 
-  const imageUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "http://localhost:5002";
+  const imageUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.bmtpossystem.com";
 
   const getAuthToken = () => {
     if (typeof window !== "undefined") {

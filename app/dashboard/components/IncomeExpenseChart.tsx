@@ -80,7 +80,7 @@ export function IncomeExpenseChart({ dateRange = 'thisMonth', onDataLoaded }: In
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5002/api';
+  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.bmtpossystem.com/api';
 
   const getAuthToken = (): string | null => {
     if (typeof window !== 'undefined') {

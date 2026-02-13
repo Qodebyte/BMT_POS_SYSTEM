@@ -123,7 +123,7 @@ const finalTotal = Math.max(0, total - totalDiscount);
 const getImageUrl = (imagePath?: string): string => {
   if (!imagePath) return '';
   const apiUrl =
-    process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'http://localhost:5002/api';
+    process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.bmtpossystem.com/api';
   return `${apiUrl}${imagePath}`;
 };
 

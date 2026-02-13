@@ -20,7 +20,7 @@ export function useWalkInCustomer() {
         throw new Error('No authentication token found');
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5002/api';
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.bmtpossystem.com/api';
       
       // Use a special endpoint or query to get the walk-in customer
       // For now, we'll fetch all customers and find the walk-in one

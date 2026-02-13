@@ -2,7 +2,7 @@ import { toast } from "sonner";
 import { ReceiptTransaction, Sale, TopVariant } from "../utils/type";
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5002/api";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.bmtpossystem.com/api";
 
 export async function registerAdmin(data: {
   full_name: string;

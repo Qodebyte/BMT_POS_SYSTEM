@@ -61,7 +61,7 @@ export function InventoryOverview({ searchQuery }: { searchQuery: string }) {
       if (!token) throw new Error('No authentication token found');
 
       const apiUrl =
-        process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5002/api';
+        process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.bmtpossystem.com/api';
 
       let url = `${apiUrl}/analytics/stock-distribution?filter=${filter}`;
 

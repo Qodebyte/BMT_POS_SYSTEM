@@ -50,7 +50,7 @@ export function useInventoryKPI(filter: string = 'today', compare: boolean = fal
           throw new Error('No authentication token found');
         }
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5002/api';
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.bmtpossystem.com/api';
         const compareParam = compare ? 'true' : 'false';
         let url = `${apiUrl}/analytics/inventory-kpi?filter=${filter}&compare=${compareParam}`;
 

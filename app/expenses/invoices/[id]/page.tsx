@@ -27,8 +27,8 @@ export default function InvoicePage() {
   const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
       const [settings, setSettings] = useState<CompanySettings | null>(null);
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5002/api';
-  const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'http://localhost:5002';
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.bmtpossystem.com/api';
+  const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.bmtpossystem.com';
 
   
   const fetchSettings = async () => {

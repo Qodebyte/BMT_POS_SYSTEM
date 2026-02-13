@@ -42,7 +42,7 @@ export function CustomerDetailPage() {
 
   const apiUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL ||
-    'http://localhost:5002/api';
+    'https://api.bmtpossystem.com/api';
 
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);

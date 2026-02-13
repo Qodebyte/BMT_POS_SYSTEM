@@ -103,7 +103,7 @@ export default function DailyHistoryPage() {
       const token = localStorage.getItem('adminToken');
       if (!token) throw new Error('No auth token');
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5002/api';
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.bmtpossystem.com/api';
       
       const salePayload = {
         customer_id: !transaction.customer.is_walk_in ? transaction.customer.id : undefined,

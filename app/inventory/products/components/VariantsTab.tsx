@@ -74,7 +74,7 @@ const getStockStatus = (quantity: number, threshold: number) => {
     setShowDeleteDialog(true);
   };
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5002/api';
+  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.bmtpossystem.com/api';
   const getToken = () => localStorage.getItem('adminToken');
 
   const handleConfirmDelete = async () => {

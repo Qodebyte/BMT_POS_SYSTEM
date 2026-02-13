@@ -35,8 +35,8 @@ export function EditVariantImagesModal({
   const [loading, setLoading] = useState(false);
   const [replaceAll, setReplaceAll] = useState(false);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5002/api';
-  const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'http://localhost:5002';
+  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.bmtpossystem.com/api';
+  const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.bmtpossystem.com';
 
   const getToken = () => localStorage.getItem('adminToken');
 

@@ -234,7 +234,7 @@ const [editingCategory, setEditingCategory] = useState<ExpenseCategory | null>(n
   const [isSubmitting, setIsSubmitting] = useState(false);
 
 
-   const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5002/api';
+   const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.bmtpossystem.com/api';
       const limit = 8;
 
 

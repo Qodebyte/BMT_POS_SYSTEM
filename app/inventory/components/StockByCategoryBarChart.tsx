@@ -70,7 +70,7 @@ export function StockByCategoryBarChart({ filter }: StockByCategoryBarChartProps
           throw new Error('No authentication token found');
         }
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5002/api';
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.bmtpossystem.com/api';
         let url = `${apiUrl}/analytics/stock-by-category?filter=${filter}`;
         if (filter === 'custom' && customRange) {
           url += `&start_date=${customRange.startDate}&end_date=${customRange.endDate}`;

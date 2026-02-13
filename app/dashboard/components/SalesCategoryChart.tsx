@@ -79,7 +79,7 @@ type CreditTransaction =
 export function CreditInstallmentOverview() {
 
   const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5002/api';
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.bmtpossystem.com/api';
 
 const getToken = () =>
   typeof window !== 'undefined'
