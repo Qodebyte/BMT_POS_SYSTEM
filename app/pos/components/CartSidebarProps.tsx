@@ -120,11 +120,13 @@ const finalTotal = Math.max(0, total - totalDiscount);
     onCheckout();
   };
 
-   const getImageUrl = (imagePath: string): string => {
-    if (!imagePath) return '';
-    const apiUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'http://localhost:5002/api';
-    return `${apiUrl}${imagePath}`;
-  };
+const getImageUrl = (imagePath?: string): string => {
+  if (!imagePath) return '';
+  const apiUrl =
+    process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'http://localhost:5002/api';
+  return `${apiUrl}${imagePath}`;
+};
+
 
  const getTaxableAmount = (item: CartItem): number => {
     return item.taxable ? item.price * item.quantity : 0;

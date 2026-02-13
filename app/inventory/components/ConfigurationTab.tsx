@@ -378,7 +378,7 @@ export function ConfigureTab() {
           name: discountName.trim(),
           discount_type: discountType,
           percentage: discountType === 'percentage' ? discountValue : null,
-          fixed_amount: discountType === 'fixed' ? discountValue : null,
+          fixed_amount: discountType === 'fixed_amount' ? discountValue : null,
           description: discountDesc,
           start_date: discountStartDate,
           end_date: discountEndDate
@@ -428,12 +428,12 @@ export function ConfigureTab() {
     }
   };
 
-  const handleDeleteDiscount = async (id: string) => {
+  const handleDeleteDiscount = async (id: number) => {
     if (!confirm('Delete this discount?')) return;
 
     try {
       const token = getToken();
-      const response = await fetch(`${apiUrl}/discounts/${id}`, {
+      const response = await fetch(`${apiUrl}/discounts/${String(id)}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -789,7 +789,7 @@ export function ConfigureTab() {
                       onChange={(e) => setDiscountType(e.target.value as DiscountType)}
                     >
                       <option value="percentage">Percentage (%)</option>
-                      <option value="fixed">Fixed Amount</option>
+                      <option value="fixed_amount">Fixed Amount</option>
                     </select>
                   </div>
 
