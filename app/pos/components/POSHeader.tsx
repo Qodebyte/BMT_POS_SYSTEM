@@ -29,7 +29,7 @@ export function POSHeader() {
       </div>
       
       
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+      {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
         <div className="bg-gray-50 p-3 rounded-lg">
           <div className="text-sm text-gray-500">Today&apos;s Sales</div>
           <div className="text-xl font-bold">NGN 24,850</div>
@@ -42,7 +42,7 @@ export function POSHeader() {
           <div className="text-sm text-gray-500">Items Sold</div>
           <div className="text-xl font-bold">156</div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
