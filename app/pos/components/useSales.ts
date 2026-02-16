@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 export interface PaymentData {
   method: 'cash' | 'card' | 'transfer' | 'split' | 'installment' | 'credit';
@@ -70,7 +70,15 @@ export function useSales(): UseSalesResponse {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+    const isCreatingSaleRef = useRef(false);
+
   const createSale = async (payload: CreateSalePayload): Promise<SaleResponse> => {
+
+        if (isCreatingSaleRef.current) {
+      console.warn('🚫 createSale blocked: already in progress');
+      throw new Error('Sale is already being processed');
+    }
+    isCreatingSaleRef.current = true;
     setLoading(true);
     setError(null);
 
@@ -103,7 +111,9 @@ export function useSales(): UseSalesResponse {
       console.error('❌ createSale error:', errorMessage);
       throw err;
     } finally {
+      isCreatingSaleRef.current = false;
       setLoading(false);
+
     }
   };
 
