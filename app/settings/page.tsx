@@ -499,15 +499,20 @@ useEffect(() => {
       const data = await res.json();
 
       if (res.ok) {
-        setRoles(
-          data.roles.map((r: Role) => ({
-            roles_id: r.roles_id,
-            role_name: r.role_name,
-            permissions: r.permissions || [],
-            createdAt: r.createdAt.split('T')[0],
-            role_count: r.role_count || 0,
-          }))
-        );
+       setRoles(
+  data.roles.map((r: Role) => ({
+    roles_id: r.roles_id,
+    role_name: r.role_name,
+    permissions: Array.isArray(r.permissions)
+      ? r.permissions
+      : typeof r.permissions === 'string'
+        ? JSON.parse(r.permissions)
+        : [],
+    createdAt: r.createdAt.split('T')[0],
+    role_count: r.role_count || 0,
+  }))
+);
+
       }
     } catch (err)   {
       toast.error('Failed to load roles');
@@ -604,6 +609,9 @@ const handleCreateRole = async () => {
     toast.error(err instanceof Error ? err.message : 'Failed to update role');
   }
 };
+
+
+
 
 
 
