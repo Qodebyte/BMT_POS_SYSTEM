@@ -84,7 +84,7 @@ export function TopProducts({ dateRange }: TopProductsProps) {
   }
 
  const IMAGE_BASE_URL =
-  process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "";
+  process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.bmtpossystem.com";
 
 
 
@@ -118,7 +118,7 @@ export function TopProducts({ dateRange }: TopProductsProps) {
       src={
         variant.image.startsWith("http")
           ? variant.image
-          : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${variant.image}`
+          : `${IMAGE_BASE_URL}${variant.image}`
       }
       alt={variant.product.name}
       width={48}

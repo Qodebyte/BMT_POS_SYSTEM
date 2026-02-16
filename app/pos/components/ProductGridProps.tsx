@@ -22,6 +22,8 @@ export function ProductGrid({ variants, onAddToCart }: ProductGridProps) {
   const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedVariants = variants.slice(startIndex, startIndex + itemsPerPage);
 
+          const apiBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.bmtpossystem.com';
+
 
 type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 
@@ -86,8 +88,9 @@ const getStockStatus = (
          
                   <div className="relative aspect-square overflow-hidden p-1 bg-gray-100">
                   {variant.image_url && variant.image_url.length > 0 ? (
+              
                       <Image
-                        src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${variant.image_url[0].url}`}
+                        src={`${apiBaseUrl}${variant.image_url[0].url}`}
                         width={200}
                         height={200}
                         alt={variant.product_name}
