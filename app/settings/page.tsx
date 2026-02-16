@@ -304,7 +304,7 @@ const paginatedRoles = roles.slice(
 useEffect(() => {
   const fetchTax = async () => {
     try {
-      const res = await fetch(`${apiUrl}/tax`, {
+      const res = await fetch(`${apiUrl}/sales/taxes`, {
         headers: {
           Authorization: `Bearer ${getAuthToken()}`,
         },
@@ -358,7 +358,7 @@ const handleTaxRateSave = async () => {
 
     if (dbTax) {
     
-      res = await fetch(`${apiUrl}/tax/${dbTax.id}`, {
+      res = await fetch(`${apiUrl}/sales/taxes/${dbTax.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
