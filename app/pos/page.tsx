@@ -24,7 +24,7 @@ import { useOfflineSync } from './components/useOfflineSync';
 import { useWalkInCustomer } from './components/useWalkInCustomer';
 import { useCustomers } from './components/useCustomers';
 import { parse } from 'path';
-import { getVariantImage, parseImageUrl } from '../utils/imageHelper';
+import { parseImageUrl } from '../utils/imageHelper';
 
 export default function POSPage() {
   const [selectedBrand, setSelectedBrand] = useState<string>("all");
@@ -132,6 +132,13 @@ export default function POSPage() {
   };
 
 
+  const getVariantImage = (image_url?: unknown): string | undefined => {
+  const images = parseImageUrl(image_url as string | { url: string }[] | undefined);
+  if (!images.length) return undefined;
+
+  return images[0].url;
+}
+
   const handleAddToCart = (variant: VariantWithProduct) => {
     const existingItem = cart.find(item => item.variantId === variant.variant_id);
 
@@ -157,16 +164,18 @@ export default function POSPage() {
           price: parseFloat(String(variant.selling_price)),
           quantity: 1,
           taxable: variant.taxable,
-       image: (() => {
+      image: (() => {
   const img = getVariantImage(variant.image_url);
   if (!img) return undefined;
-  if (img.startsWith('http')) return img;
+
+  if (img.startsWith("http")) return img;
 
   const base =
-    process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.bmtpossystem.com';
+    process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.bmtpossystem.com";
 
-  return img.startsWith('/') ? `${base}${img}` : `${base}/${img}`;
+  return img.startsWith("/") ? `${base}${img}` : `${base}/${img}`;
 })(),
+
           stock: variant.quantity,
         productDiscount: discount ? {
             id: discount.id,

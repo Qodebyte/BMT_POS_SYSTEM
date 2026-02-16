@@ -23,18 +23,24 @@ export function parseImageUrl(
 }
 
 
-export const getVariantImage = (image_url?: string | ImageUrl[]): string => {
-  if (!image_url) return '';
+export function parseImageCartUrl(
+  image_url: unknown
+): { url: string }[] {
+  if (!image_url) return [];
 
-  // Case 1: already a string
-  if (typeof image_url === 'string') {
-    return image_url;
+  
+  if (Array.isArray(image_url)) return image_url as { url: string }[];
+
+ 
+  if (typeof image_url === "string") {
+    try {
+      const parsed = JSON.parse(image_url);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   }
 
-  // Case 2: ImageUrl[]
-  if (Array.isArray(image_url) && image_url.length > 0) {
-    return image_url[0].url ?? '';
-  }
+  return [];
+}
 
-  return '';
-};
