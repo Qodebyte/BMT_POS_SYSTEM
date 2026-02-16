@@ -278,7 +278,7 @@ export default function SettingsPage() {
     const [taxRate, setTaxRate] = useState<number>(0);
   const [isTaxDialogOpen, setIsTaxDialogOpen] = useState(false);
   const [tempTaxRate, setTempTaxRate] = useState<number>(0);
-  
+  const [dbTax, setDbTax] = useState<{ id: number; taxRate: number } | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -301,28 +301,103 @@ const paginatedRoles = roles.slice(
 );
 
 
-  useEffect(() => {
-    const savedTaxRate = localStorage.getItem('pos_default_tax_rate');
-    if (savedTaxRate) {
-      const rate = parseFloat(savedTaxRate);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTaxRate(rate);
-      setTempTaxRate(rate);
+useEffect(() => {
+  const fetchTax = async () => {
+    try {
+      const res = await fetch(`${apiUrl}/tax`, {
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        credentials: 'include',
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.taxes.length > 0) {
+        const taxFromDb = data.taxes[0];
+
+        const percent = taxFromDb.taxRate * 100;
+
+        setDbTax(taxFromDb);
+        setTaxRate(percent);
+        setTempTaxRate(percent);
+
+      
+        localStorage.setItem('pos_default_tax_rate', percent.toString());
+        toast('Default tax rate loaded from database');
+      } else {
+       
+        const localTax = localStorage.getItem('pos_default_tax_rate');
+        if (localTax) {
+          setTaxRate(Number(localTax));
+          setTempTaxRate(Number(localTax));
+          toast('Default tax rate loaded from local storage');
+        }
+        toast('No tax rate found in database, using default or local storage value');
+      }
+      toast.success('Tax rate loaded successfully');
+    } catch (err) {
+      console.error('Failed to fetch tax:', err);
     }
-  }, []);
+  };
+
+  fetchTax();
+}, [apiUrl]);
 
   
-  const handleTaxRateSave = () => {
-    if (tempTaxRate < 0 || tempTaxRate > 100) {
-      toast('Tax rate must be between 0 and 100!');
-      return;
+const handleTaxRateSave = async () => {
+  if (tempTaxRate < 0 || tempTaxRate > 100) {
+    toast.error('Tax rate must be between 0 and 100');
+    return;
+  }
+
+  const taxDecimal = tempTaxRate / 100;
+
+  try {
+    let res;
+
+    if (dbTax) {
+    
+      res = await fetch(`${apiUrl}/tax/${dbTax.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        credentials: 'include',
+        body: JSON.stringify({ taxRate: taxDecimal }),
+      });
+    } else {
+    
+      res = await fetch(`${apiUrl}/tax`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        credentials: 'include',
+        body: JSON.stringify({ taxRate: taxDecimal }),
+      });
     }
 
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message);
+
+   
     setTaxRate(tempTaxRate);
     localStorage.setItem('pos_default_tax_rate', tempTaxRate.toString());
+
+    if (!dbTax && data.tax) {
+      setDbTax(data.tax);
+    }
+
+    toast.success('Tax rate saved successfully');
     setIsTaxDialogOpen(false);
-    toast('Tax rate updated successfully!');
-  };
+  } catch (err: unknown) {
+    toast.error(err instanceof Error ? err.message : 'Failed to save tax rate');
+  }
+};
+
 
   const handleTaxDialogOpen = () => {
     setTempTaxRate(taxRate);
