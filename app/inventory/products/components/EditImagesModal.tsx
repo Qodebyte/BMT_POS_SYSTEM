@@ -363,7 +363,6 @@ export function EditImagesModal({ product, open, onOpenChange, onSave }: EditIma
                       alt={`Product ${index + 1}`}
                       width={100}
                       height={100}
-                      unoptimized
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -437,7 +436,6 @@ export function EditImagesModal({ product, open, onOpenChange, onSave }: EditIma
                       <div key={index} className="relative group">
                         <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                           <Image
-                            unoptimized
                             src={image}
                             alt={`Variant ${index + 1}`}
                             width={100}

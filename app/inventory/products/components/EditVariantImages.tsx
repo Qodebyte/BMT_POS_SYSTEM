@@ -166,7 +166,6 @@ export function EditVariantImagesModal({
                   <Image 
                     width={100} 
                     height={100} 
-                    unoptimized 
                     src={image} 
                     alt={`Variant ${index + 1}`} 
                     className="w-full h-full object-cover" 

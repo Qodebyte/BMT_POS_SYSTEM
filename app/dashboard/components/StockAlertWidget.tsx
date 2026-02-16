@@ -117,7 +117,6 @@ export function StockAlertWidget() {
                       width={80}
                       height={80}
                       className="w-full h-full object-cover"
-                      unoptimized={true} 
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gray-100">

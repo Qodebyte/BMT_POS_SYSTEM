@@ -32,7 +32,6 @@ export function ProductImageGallery({
             width={400}
             height={400}
             className="w-full h-full object-cover"
-            unoptimized
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -87,7 +86,6 @@ export function ProductImageGallery({
               height={80}
               alt={`Thumbnail ${index + 1}`}
               className="w-full h-full object-cover"
-              unoptimized
             />
           </button>
         ))}

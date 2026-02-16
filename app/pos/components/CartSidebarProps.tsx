@@ -285,7 +285,6 @@ const getImageUrl = (imagePath?: string): string => {
                                 height={100}
                               alt={item.productName}
                               className="h-full w-full object-cover"
-                              unoptimized
                             />
                           ) : (
                             <div className="h-full w-full flex items-center justify-center text-gray-400">

@@ -341,7 +341,6 @@ const fetchExpenseDetail = async () => {
                     alt="Expense Receipt"
                     width={50}
                     height={50}
-                    unoptimized
                     className="w-full h-auto object-cover"
                     onError={(e) => {
                       e.currentTarget.src = '/placeholder-receipt.png';

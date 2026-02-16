@@ -95,7 +95,6 @@ const getStockStatus = (
                         height={200}
                         alt={variant.product_name}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                        unoptimized
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

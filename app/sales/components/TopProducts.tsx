@@ -124,7 +124,6 @@ export function TopProducts({ dateRange }: TopProductsProps) {
       width={48}
       height={48}
       className="object-cover"
-      unoptimized
     />
   ) : (
     <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">
