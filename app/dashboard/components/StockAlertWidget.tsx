@@ -67,7 +67,7 @@ export function StockAlertWidget() {
     };
 
     fetchStockAlerts();
-  }, []);
+  }, [apiUrl]);
   return (
     <Card className="bg-gray-white border border-gray-100  shadow-2xl ">
       <CardHeader className="pb-3">
@@ -88,7 +88,7 @@ export function StockAlertWidget() {
           <p className="text-sm text-gray-500">Loading stock alerts...</p>
         )}
 
-        {/* EMPTY */}
+       
         {!loading && items.length === 0 && (
           <p className="text-sm text-gray-500">
             🎉 All stock levels look good!
@@ -102,8 +102,15 @@ export function StockAlertWidget() {
                 flex items-start gap-3 p-3 rounded-lg border
                 ${item.status === 'critical' 
                   ? 'bg-red-50 border-red-200' 
-                  : 'bg-yellow-50 border-green-200'
+                  : 'bg-yellow-50 border-yellow-200'
                 }
+                ${item.status === 'warning' 
+                ? 'hover:bg-yellow-100 hover:border-yellow-300' 
+                : 'hover:bg-red-100 hover:border-red-300'
+                }
+                ${item.status === 'normal' 
+                ? 'hover:bg-green-100 hover:border-green-300' 
+                : 'hover:bg-gray-100 hover:border-gray-300'}
                 hover:shadow-sm transition-shadow duration-200
               `}
             >
@@ -129,6 +136,16 @@ export function StockAlertWidget() {
                     <span className="text-white text-xs font-bold">!</span>
                   </div>
                 )}
+                {item.status === 'warning' && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">!</span>
+                  </div>
+                )}
+                {item.status === 'normal' && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">✓</span>
+                  </div>
+                )}
               </div>
 
              
@@ -143,7 +160,7 @@ export function StockAlertWidget() {
                         <span className="text-gray-600">Current:</span>
                         <span className={`
                           font-medium
-                          ${item.status === 'critical' ? 'text-red-600' : 'text-green-500'}
+                          ${item.status === 'critical' ? 'text-red-600' : item.status === 'warning' ? 'text-yellow-600' : 'text-green-500'}
                         `}>
                           {item.current} units
                         </span>
@@ -163,7 +180,7 @@ export function StockAlertWidget() {
                       : 'bg-yellow-100 text-green-800 border border-green-200'
                     }
                   `}>
-                    {item.status === 'critical' ? 'URGENT' : 'WARNING'}
+                    {item.status === 'critical' ? 'URGENT' : item.status === 'warning' ? 'WARNING' : 'OK'}
                   </div>
                 </div>
 
