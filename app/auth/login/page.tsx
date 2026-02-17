@@ -12,7 +12,7 @@ import Link from 'next/link';
 import { AuthForm } from '@/app/components/AuthForm';
 import { toast } from 'sonner';
 import { loginAdmin } from "@/app/mock/auth";
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email'),
@@ -32,6 +32,7 @@ export default function LoginPage() {
     email?: string;
     password?: string;
   }>({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -162,7 +163,7 @@ export default function LoginPage() {
                     </svg>
                     <Input
                       type="email"
-                      placeholder="admin@bigmentransaction.com"
+                      placeholder="admin@primelabs.com"
                       className={`bg-gray-900/50 text-white pl-10 h-11 rounded-lg focus:ring-2 transition-all duration-200 ${
                         fieldErrors.email
                           ? 'border-2 border-red-500 focus:border-red-500 focus:ring-red-500/30'
@@ -183,39 +184,71 @@ export default function LoginPage() {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-white text-sm font-medium tracking-wide">Password</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    <Input
-                      type="password"
-                      placeholder="Enter your password"
-                      className={`bg-gray-900/50 text-white pl-10 h-11 rounded-lg focus:ring-2 transition-all duration-200 ${
-                        fieldErrors.password
-                          ? 'border-2 border-red-500 focus:border-red-500 focus:ring-red-500/30'
-                          : 'border-gray-700 focus:border-green-400 focus:ring-green-400/20'
-                      }`}
-                      {...field}
-                    />
-                  </div>
-                </FormControl>
-                {fieldErrors.password && (
-                  <div className="flex items-center gap-2 mt-2 p-2 bg-red-500/10 border border-red-500/30 rounded text-red-400 text-xs">
-                    <AlertCircle className="h-3 w-3 flex-shrink-0" />
-                    <span>{fieldErrors.password}</span>
-                  </div>
-                )}
-                <FormMessage className="text-red-400 text-xs" />
-              </FormItem>
-            )}
+         <FormField
+  control={form.control}
+  name="password"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="text-white text-sm font-medium tracking-wide">
+        Password
+      </FormLabel>
+
+      <FormControl>
+        <div className="relative">
+       
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+            />
+          </svg>
+
+         
+          <Input
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter your password"
+            className={`bg-gray-900/50 text-white pl-10 pr-10 h-11 rounded-lg focus:ring-2 transition-all duration-200 ${
+              fieldErrors.password
+                ? "border-2 border-red-500 focus:border-red-500 focus:ring-red-500/30"
+                : "border-gray-700 focus:border-green-400 focus:ring-green-400/20"
+            }`}
+            {...field}
           />
+
+        
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition"
+            tabIndex={-1}
+          >
+            {showPassword ? (
+              <EyeOff className="w-5 h-5" />
+            ) : (
+              <Eye className="w-5 h-5" />
+            )}
+          </button>
+        </div>
+      </FormControl>
+
+      {fieldErrors.password && (
+        <div className="flex items-center gap-2 mt-2 p-2 bg-red-500/10 border border-red-500/30 rounded text-red-400 text-xs">
+          <AlertCircle className="h-3 w-3 flex-shrink-0" />
+          <span>{fieldErrors.password}</span>
+        </div>
+      )}
+
+      <FormMessage className="text-red-400 text-xs" />
+    </FormItem>
+  )}
+/>
 
           <Button
             type="submit"

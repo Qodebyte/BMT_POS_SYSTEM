@@ -11,6 +11,7 @@ import { AuthForm } from '@/app/components/AuthForm';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { registerAdmin } from '@/app/mock/auth';
+import { Eye, EyeOff } from 'lucide-react';
 
 const registerSchema = z.object({
   full_name: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -25,7 +26,8 @@ const registerSchema = z.object({
 export default function RegisterPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-
+  const [showNewPassword, setShowNewPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: { 
@@ -157,13 +159,21 @@ export default function RegisterPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                     <Input 
-                      type="password" 
+                       type={showNewPassword ? "text" : "password"}
                       placeholder="Minimum 8 characters" 
                       className={`bg-gray-900/50 border-gray-700 text-white pl-10 h-11 rounded-lg focus:border-green-400 focus:ring-green-400/20 transition-colors ${
                         fieldState.error ? 'border-red-500 focus:border-red-500 focus:ring-red-400/20' : ''
                       }`}
                       {...field} 
                     />
+                    <button
+                    type="button"
+                    onClick={() => setShowNewPassword(p => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                    tabIndex={-1}  
+                  >
+                    {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                   </div>
                 </FormControl>
                 <FormMessage className="text-red-400 text-xs" />
@@ -183,13 +193,21 @@ export default function RegisterPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                     <Input 
-                      type="password" 
+                      type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm your password" 
                       className={`bg-gray-900/50 border-gray-700 text-white pl-10 h-11 rounded-lg focus:border-green-400 focus:ring-green-400/20 transition-colors ${
                         fieldState.error ? 'border-red-500 focus:border-red-500 focus:ring-red-400/20' : ''
                       }`}
                       {...field} 
                     />
+                    <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(p => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                   </div>
                 </FormControl>
                 <FormMessage className="text-red-400 text-xs" />

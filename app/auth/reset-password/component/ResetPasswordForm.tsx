@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { AuthForm } from '@/app/components/AuthForm';
 import { toast } from 'sonner';
 import { resetPassword } from '@/app/mock/auth';
+import { Eye, EyeOff } from 'lucide-react';
 
 const resetSchema = z.object({
   new_password: z.string().min(8, 'Password must be at least 8 characters'),
@@ -24,6 +25,9 @@ export default function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const admin_id = searchParams.get('admin_id') || ''; 
   const [loading, setLoading] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
   const form = useForm<z.infer<typeof resetSchema>>({
     resolver: zodResolver(resetSchema),
@@ -97,14 +101,23 @@ export default function ResetPasswordForm() {
                     <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
-                    <Input 
-                      type="password" 
-                      placeholder="Enter new password" 
-                      className={`bg-gray-900/50 border-gray-700 text-white pl-10 h-11 rounded-lg focus:border-green-400 focus:ring-green-400/20 transition-colors ${
-                        fieldState.error ? 'border-red-500 focus:border-red-500 focus:ring-red-400/20' : ''
-                      }`}
-                      {...field} 
-                    />
+                  <Input
+                  type={showNewPassword ? "text" : "password"}
+                  placeholder="Enter new password"
+                  className={`bg-gray-900/50 border-gray-700 text-white pl-10 pr-10 h-11 rounded-lg ${
+                    fieldState.error ? 'border-red-500' : ''
+                  }`}
+                  {...field}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(p => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  tabIndex={-1}  
+                >
+                  {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
                   </div>
                 </FormControl>
                 <FormMessage className="text-red-400 text-xs" />
@@ -123,14 +136,23 @@ export default function ResetPasswordForm() {
                     <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                    <Input 
-                      type="password" 
-                      placeholder="Confirm new password" 
-                      className={`bg-gray-900/50 border-gray-700 text-white pl-10 h-11 rounded-lg focus:border-green-400 focus:ring-green-400/20 transition-colors ${
-                        fieldState.error ? 'border-red-500 focus:border-red-500 focus:ring-red-400/20' : ''
-                      }`}
-                      {...field} 
-                    />
+                  <Input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm new password"
+                  className={`bg-gray-900/50 border-gray-700 text-white pl-10 pr-10 h-11 rounded-lg ${
+                    fieldState.error ? 'border-red-500' : ''
+                  }`}
+                  {...field}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(p => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  tabIndex={-1}   
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
                   </div>
                 </FormControl>
                 <FormMessage className="text-red-400 text-xs" />
