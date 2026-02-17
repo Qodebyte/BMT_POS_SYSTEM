@@ -24,17 +24,27 @@ export function BarcodeScanner({ onBarcodeScanned, isProcessing = false }: Barco
   const bufferRef = useRef<string>('');
   const lastTimeRef = useRef<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [scannerEnabled, setScannerEnabled] = useState(true);
 
   useEffect(() => {
     inputRef.current?.focus();
    
-    const handleWindowClick = () => {
-      // Only focus if the barcode input is visible and not in a modal/dialog
-      const isModalOpen = document.querySelector('[role="dialog"]');
-      if (!isModalOpen && document.activeElement !== inputRef.current) {
-        inputRef.current?.focus();
-      }
-    };
+   const handleWindowClick = () => {
+  const isModalOpen = document.querySelector('[role="dialog"]');
+  const activeElement = document.activeElement;
+
+  if (
+    isModalOpen ||
+    activeElement instanceof HTMLInputElement ||
+    activeElement instanceof HTMLTextAreaElement ||
+    activeElement instanceof HTMLSelectElement
+  ) {
+    return;
+  }
+
+  inputRef.current?.focus();
+};
+
     
     window.addEventListener('click', handleWindowClick);
     return () => window.removeEventListener('click', handleWindowClick);
@@ -42,6 +52,8 @@ export function BarcodeScanner({ onBarcodeScanned, isProcessing = false }: Barco
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+       if (!scannerEnabled) return;
+  if (document.activeElement !== inputRef.current) return;
       const now = Date.now();
 
       // Check if a dialog/modal is open
@@ -97,6 +109,20 @@ export function BarcodeScanner({ onBarcodeScanned, isProcessing = false }: Barco
       }
     };
   }, [onBarcodeScanned]);
+
+  useEffect(() => {
+  const disable = () => setScannerEnabled(false);
+  const enable = () => setScannerEnabled(true);
+
+  window.addEventListener('disable-scanner', disable);
+  window.addEventListener('enable-scanner', enable);
+
+  return () => {
+    window.removeEventListener('disable-scanner', disable);
+    window.removeEventListener('enable-scanner', enable);
+  };
+}, []);
+
 
   const handleBarcodeInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const currentTime = Date.now();

@@ -150,6 +150,9 @@ const toNumber = (val: number | string | undefined): number => {
   return typeof val === 'string' ? parseFloat(val) : val;
 };
 
+const discountAmount = toNumber(discount);
+
+
   return (
     <div style={styles.container}>
       {/* Header */}
@@ -311,12 +314,12 @@ const toNumber = (val: number | string | undefined): number => {
           <span>Subtotal:</span>
           <span>{formatCurrency(subtotal)}</span>
         </div>
-         {discount && discount > 0 && (
-            <div style={styles.row}>
-              <span>Discount:</span>
-              <span>-{formatCurrency(discount)}</span>
-            </div>
-          )}
+        {discountAmount > 0 && (
+  <div style={styles.row}>
+    <span>Discount:</span>
+    <span>-{formatCurrency(discountAmount)}</span>
+  </div>
+)}
         <div style={styles.row}>
           <span>Tax:</span>
           <span>{formatCurrency(tax)}</span>
@@ -384,13 +387,13 @@ const toNumber = (val: number | string | undefined): number => {
         </div>
         <div style={{ marginTop: '2px', fontSize: '10px' }}>
           <span>
-           Qodebyte Digital Solutions. All rights reserved.
+           Primelabs Business Solutions. All rights reserved.
           </span>
 
           <span >
             Powered by
             <span>
-              Qodebyte Digital Solutions 
+              Primelabs Business Solutions 
             </span>
     </span>
         </div>

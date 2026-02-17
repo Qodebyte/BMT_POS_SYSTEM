@@ -32,6 +32,17 @@ interface CartSidebarProps {
   onPurchaseTypeChange: (type: 'in-store' | 'online') => void;
    itemDiscountToggles?: Record<string, boolean>;
   onDiscountToggle?: (itemId: string) => void;
+  discountMode: 'auto' | 'manual';
+onDiscountModeChange: (mode: 'auto' | 'manual') => void;
+
+manualDiscount: {
+  type: 'fixed_amount' | 'percentage';
+  value: number;
+};
+onManualDiscountChange: (data: {
+  type: 'fixed_amount' | 'percentage';
+  value: number;
+}) => void;
 }
 
 export function CartSidebar({
@@ -52,6 +63,10 @@ export function CartSidebar({
   onPurchaseTypeChange,
   itemDiscountToggles = {},
   onDiscountToggle,
+  discountMode,
+  onDiscountModeChange,
+  manualDiscount,
+  onManualDiscountChange,
 }: CartSidebarProps) {
 
 
@@ -425,6 +440,70 @@ const finalTotal = Math.max(0, total - totalDiscount);
 )}
           
           <Separator />
+
+
+          <div className="space-y-2">
+  <Label>Discount Mode</Label>
+
+  <div className="grid grid-cols-2 gap-2">
+    <Button
+      variant={discountMode === 'auto' ? 'default' : 'secondary'}
+      onClick={() => onDiscountModeChange('auto')}
+    >
+      Auto
+    </Button>
+
+    <Button
+      variant={discountMode === 'manual' ? 'default' : 'secondary'}
+      onClick={() => onDiscountModeChange('manual')}
+    >
+      Manual
+    </Button>
+  </div>
+</div>
+
+
+{discountMode === 'manual' && (
+  <div className="space-y-2 bg-gray-50 p-3 rounded-lg border">
+    <Label>Manual Discount</Label>
+
+    <Select
+      value={manualDiscount.type}
+      onValueChange={(value) =>
+        onManualDiscountChange({
+          ...manualDiscount,
+          type: value as 'fixed_amount' | 'percentage',
+        })
+      }
+    >
+      <SelectTrigger>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="fixed_amount">Fixed Amount</SelectItem>
+        <SelectItem value="percentage">Percentage</SelectItem>
+      </SelectContent>
+    </Select>
+
+    <Input
+      type="number"
+      min="0"
+      value={manualDiscount.value}
+       onFocus={() => window.dispatchEvent(new CustomEvent('disable-scanner'))}
+        onBlur={() => window.dispatchEvent(new CustomEvent('enable-scanner'))}
+      onChange={(e) =>
+        onManualDiscountChange({
+          ...manualDiscount,
+          value: Number(e.target.value) || 0,
+        })
+      }
+      placeholder={manualDiscount.type === 'percentage' ? 'e.g. 10%' : 'e.g. 500'}
+    />
+  </div>
+)}
+
+
+   <Separator />
           
           <div className="flex justify-between text-lg font-bold">
             <span>Total</span>

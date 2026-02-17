@@ -389,13 +389,13 @@ const fetchExpenseDetail = async () => {
                 </div>
                  <div>
     <span>
-      © {new Date().getFullYear()} Qodebyte Digital Solutions. All rights reserved.
+      © {new Date().getFullYear()} Primelabs Business Solutions. All rights reserved.
     </span>
 
     <span className="flex items-center gap-1">
       Powered by
       <span className="font-medium text-gray-700">
-        Qodebyte Digital Solutions
+        Primelabs Business Solutions
       </span>
     </span>
                  </div>

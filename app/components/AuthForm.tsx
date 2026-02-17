@@ -88,7 +88,7 @@ export function AuthForm({ title, description, children, footer }: AuthFormProps
         <div className="mt-6 text-center">
           <div className="inline-flex items-center gap-2 text-gray-500 text-xs">
             <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-            <span>  © {new Date().getFullYear()} Powered by QodeByte Pro Services</span>
+            <span>  © {new Date().getFullYear()} Powered by Primelabs Business Solutions</span>
             <span>Secure • Encrypted • Monitored</span>
           </div>
         </div>

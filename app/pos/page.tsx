@@ -59,7 +59,31 @@ export default function POSPage() {
     is_walk_in: true,
   });
 
-  
+  type DiscountMode = 'auto' | 'manual';
+
+const [discountMode, setDiscountMode] = useState<DiscountMode>('auto');
+
+const [manualDiscount, setManualDiscount] = useState<{
+  type: 'fixed_amount' | 'percentage';
+  value: number;
+}>({
+  type: 'fixed_amount',
+  value: 0,
+});
+
+const calculateManualDiscount = () => {
+  if (manualDiscount.value <= 0) return 0;
+
+  if (manualDiscount.type === 'percentage') {
+    return (calculateSubtotal() * manualDiscount.value) / 100;
+  }
+
+  return Math.min(manualDiscount.value, calculateSubtotal());
+};
+
+
+
+
 
   useEffect(() => {
       const storedAdminData = localStorage.getItem('adminDetail');
@@ -271,8 +295,16 @@ export default function POSPage() {
     }, 0);
   };
 
-  const totalDiscount = calculateDiscount();
-  const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
+const autoDiscount =
+  discountMode === 'auto' ? calculateDiscount() : 0;
+
+const manualDiscountAmount =
+  discountMode === 'manual' ? calculateManualDiscount() : 0;
+
+const totalDiscount = autoDiscount + manualDiscountAmount;
+
+const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
+
 
   const handleBarcodeScanned = async (barcode: string) => {
     setIsScannerProcessing(true);
@@ -409,6 +441,10 @@ export default function POSPage() {
             onPurchaseTypeChange={setPurchaseType} 
             itemDiscountToggles={itemDiscountToggles}
             onDiscountToggle={handleToggleDiscount} 
+            discountMode={discountMode}
+            onDiscountModeChange={setDiscountMode}
+            manualDiscount={manualDiscount}
+            onManualDiscountChange={setManualDiscount}
           />
         </div>
       </div>

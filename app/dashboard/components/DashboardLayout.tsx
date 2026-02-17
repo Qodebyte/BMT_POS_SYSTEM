@@ -44,13 +44,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <footer className="mt-10 border-t border-gray-200 pt-4">
   <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-gray-500">
     <span>
-      © {new Date().getFullYear()} Qodebyte Digital Solutions. All rights reserved.
+      © {new Date().getFullYear()} Primelabs Business Solutions. All rights reserved.
     </span>
 
     <span className="flex items-center gap-1">
       Powered by
       <span className="font-medium text-gray-700">
-        Qodebyte Digital Solutions
+        Primelabs Business Solutions
       </span>
     </span>
   </div>

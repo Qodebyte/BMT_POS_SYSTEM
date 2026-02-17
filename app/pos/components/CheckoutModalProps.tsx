@@ -1037,7 +1037,7 @@ useEffect(() => {
                     <span>Discount</span>
                     <span>- NGN {totalDiscount.toFixed(2)}</span>
                   </div>
-                )}
+                ) }
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
                   <span>NGN {netTotal.toFixed(2)}</span>
