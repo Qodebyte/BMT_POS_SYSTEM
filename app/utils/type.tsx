@@ -228,7 +228,7 @@ export interface TopVariant {
     };
   };
 
-  image: string | null;
+   image: { url: string }[] | null;
 
   sales_metrics: {
     total_quantity: number;

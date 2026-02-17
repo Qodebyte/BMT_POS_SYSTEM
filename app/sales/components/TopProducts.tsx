@@ -18,6 +18,11 @@ interface TopProductsProps {
   dateRange: DateRange;
 }
 
+type ImageItem = {
+  url: string;
+};
+
+
 export function TopProducts({ dateRange }: TopProductsProps) {
   const [topVariants, setTopVariants] = useState<TopVariant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,6 +88,23 @@ export function TopProducts({ dateRange }: TopProductsProps) {
     );
   }
 
+  const resolveImageUrl = (
+  image: ImageItem[] | null | undefined,
+  baseUrl: string
+): string | null => {
+  if (!image || image.length === 0) return null;
+
+  const first = image[0];
+
+  if (!first?.url) return null;
+
+  return first.url.startsWith("http")
+    ? first.url
+    : `${baseUrl}${first.url}`;
+};
+
+
+
  const IMAGE_BASE_URL =
   process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.bmtpossystem.com";
 
@@ -90,7 +112,9 @@ export function TopProducts({ dateRange }: TopProductsProps) {
 
   return (
     <div className="space-y-4">
-      {topVariants.map((variant) => (
+      {topVariants.map((variant) => {
+         const imageUrl = resolveImageUrl(variant.image, IMAGE_BASE_URL);
+        return (
         <div
           key={variant.variant_id}
           className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
@@ -112,14 +136,10 @@ export function TopProducts({ dateRange }: TopProductsProps) {
             </div>
 
           
-          <div className="w-12 h-12 rounded-md overflow-hidden bg-gray-100 border">
-  {variant.image ? (
+                <div className="w-12 h-12 rounded-md overflow-hidden bg-gray-100 border">
+  {imageUrl ? (
     <Image
-      src={
-        variant.image.startsWith("http")
-          ? variant.image
-          : `${IMAGE_BASE_URL}${variant.image}`
-      }
+      src={imageUrl}
       alt={variant.product.name}
       width={48}
       height={48}
@@ -161,7 +181,7 @@ export function TopProducts({ dateRange }: TopProductsProps) {
             </div>
           </div>
         </div>
-      ))}
+      )})}
 
   
       <div className="pt-4 mt-4 border-t grid grid-cols-2 gap-4 text-sm">
