@@ -295,8 +295,8 @@ const finalTotal = Math.max(0, total - totalDiscount);
               {cart.map((item) => {
                   const imageUrl = getImageUrl(item.image);
                    return (
-                      <Card key={item.id} className="overflow-hidden text-gray-900 bg-white border-gray-100 border shadow-sm">
-                  <CardContent className="p-4">
+                      <Card key={item.id} className="overflow-hidden py-3 text-gray-900 bg-white border-gray-100 border shadow-sm">
+                  <CardContent className="p-2">
                     <div className="flex gap-3">
                     
                       <div className="flex-shrink-0">

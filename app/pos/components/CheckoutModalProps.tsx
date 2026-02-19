@@ -545,7 +545,17 @@ useEffect(() => {
   }
 }, [paymentMethod]);
 
-
+useEffect(() => {
+  if (
+    paymentMethod !== 'split' &&
+    !(paymentMethod === 'credit' && creditType === 'full')
+  ) {
+    setAmountPaid(netTotal.toFixed(2));
+  }
+  if (paymentMethod === 'credit' && creditType === 'full') {
+    setAmountPaid('0');
+  }
+}, [paymentMethod, creditType, netTotal]);
 
   const calculateDueDate = (startDate: string, frequency: string, offset: number) => {
     const date = new Date(startDate);

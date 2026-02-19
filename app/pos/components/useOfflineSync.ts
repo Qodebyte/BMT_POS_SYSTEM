@@ -99,11 +99,17 @@ export function useOfflineSync(onWalkInSynced?: () => Promise<void>): UseOffline
         successCount++;
 
         console.log(`✅ Synced transaction ${transaction.id}`);
-      } catch (error) {
-        failureCount++;
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        OfflineTransactionManager.markSyncAttempt(transaction.id, errorMessage);
-
+      }catch (error) {
+  failureCount++;
+  const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+ 
+  if (errorMessage.includes('validation') || errorMessage.includes('required') || errorMessage.includes('Failed to create sale')) {
+    OfflineTransactionManager.markAsFailed(transaction.id, errorMessage);
+    OfflineTransactionManager.clearFailedTransactions();
+  } else {
+    OfflineTransactionManager.markSyncAttempt(transaction.id, errorMessage);
+    OfflineTransactionManager.removeTransactionsWithoutStatus();
+  }
         console.warn(
           `⚠️ Failed to sync transaction ${transaction.id}: ${errorMessage}`
         );

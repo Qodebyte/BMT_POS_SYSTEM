@@ -9,10 +9,11 @@ export interface OfflineTransaction {
   synced: boolean;
   syncAttempts: number;
   lastSyncError?: string;
+  status?: 'pending' | 'failed' | 'synced'; 
 }
 
 const OFFLINE_TRANSACTIONS_KEY = 'pos_offline_transactions';
-const TRANSACTION_SYNC_INTERVAL = 30000; // 30 seconds
+const TRANSACTION_SYNC_INTERVAL = 30000; 
 
 export class OfflineTransactionManager {
   static addTransaction(transactionData: Transaction): string {
@@ -25,6 +26,7 @@ export class OfflineTransactionManager {
       createdAt: new Date().toISOString(),
       synced: false,
       syncAttempts: 0,
+      status: 'pending',
     };
 
     transactions.push(offlineTransaction);
@@ -53,6 +55,7 @@ export class OfflineTransactionManager {
 
     if (transaction) {
       transaction.synced = true;
+      transaction.status = 'synced'; 
       localStorage.setItem(OFFLINE_TRANSACTIONS_KEY, JSON.stringify(transactions));
     }
   }
@@ -70,8 +73,31 @@ export class OfflineTransactionManager {
     }
   }
 
+    static markAsFailed(transactionId: string, error?: string): void {
+    const transactions = this.getTransactions();
+    const transaction = transactions.find(t => t.id === transactionId);
+
+    if (transaction) {
+      transaction.status = 'failed';
+      transaction.lastSyncError = error;
+      localStorage.setItem(OFFLINE_TRANSACTIONS_KEY, JSON.stringify(transactions));
+    }
+  }
+
+  static removeTransactionsWithoutStatus(): void {
+    const transactions = this.getTransactions().filter(
+      t => typeof t.status !== 'undefined' || t.synced === true
+    );
+    localStorage.setItem(OFFLINE_TRANSACTIONS_KEY, JSON.stringify(transactions));
+  }
+
   static removeTransaction(transactionId: string): void {
     const transactions = this.getTransactions().filter(t => t.id !== transactionId);
+    localStorage.setItem(OFFLINE_TRANSACTIONS_KEY, JSON.stringify(transactions));
+  }
+
+    static clearFailedTransactions(): void {
+    const transactions = this.getTransactions().filter(t => t.status !== 'failed');
     localStorage.setItem(OFFLINE_TRANSACTIONS_KEY, JSON.stringify(transactions));
   }
 
