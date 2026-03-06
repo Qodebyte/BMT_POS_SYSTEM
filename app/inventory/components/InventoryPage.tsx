@@ -64,7 +64,7 @@ export  function InventoryPage() {
           placeholder="Search product by name..."
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          className="border border-gray-300 rounded-md px-3 py-2 w-full max-w-xs focus:outline-none focus:ring-2 focus:ring-green-400"
+          className="border border-gray-300 text-gray-900 rounded-md px-3 py-2 w-full max-w-xs focus:outline-none focus:ring-2 focus:ring-green-400"
         />
       </div>
 
