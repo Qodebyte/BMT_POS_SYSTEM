@@ -13,15 +13,13 @@ import { ProductTable } from './ProductTable';
 import { ConfigureTab } from './ConfigurationTab';
 import { usePageGuard } from '@/app/hooks/usePageGuard';
 
-
 export  function InventoryPage() {
-   usePageGuard();
+  usePageGuard();
   const [activeTab, setActiveTab] = useState("overview");
-  const [searchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <div className="space-y-6 bg-white lg:p-6 p-1">
-  
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
@@ -29,30 +27,26 @@ export  function InventoryPage() {
             Manage products, stock levels, and track inventory movement
           </p>
         </div>
-        
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative">
-              <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="h-8 w-8 bg-green-400 rounded-lg flex items-center justify-center">
-            <span className="text-black font-bold text-sm">BMT</span>
+            <Link href="/dashboard" className="flex items-center gap-3">
+              <div className="h-8 w-8 bg-green-400 rounded-lg flex items-center justify-center">
+                <span className="text-black font-bold text-sm">BMT</span>
+              </div>
+              <div>
+                <div className="font-bold text-gray-900 text-lg">Big Men</div>
+                <div className="text-xs text-gray-800 -mt-1">Transaction Apparel</div>
+              </div>
+            </Link>
           </div>
-          <div>
-            <div className="font-bold text-gray-900 text-lg">Big Men</div>
-            <div className="text-xs text-gray-800 -mt-1">Transaction Apparel</div>
-          </div>
-        </Link>
-          </div>
-          
           <Button variant="outline" className="flex items-center gap-2">
             <Filter className="h-4 w-4" />
             Filter
           </Button>
-          
           <Button className="flex items-center gap-2 bg-green-400 hover:bg-green-500 text-black">
             <Download className="h-4 w-4" />
             Export
           </Button>
-          
           <Button 
             className="flex items-center gap-2 bg-black hover:bg-gray-800 text-gray-100"
             onClick={() => setActiveTab("add")}
@@ -61,6 +55,17 @@ export  function InventoryPage() {
             Add Product
           </Button>
         </div>
+      </div>
+
+
+      <div className="flex justify-end mt-2">
+        <input
+          type="text"
+          placeholder="Search product by name..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          className="border border-gray-300 rounded-md px-3 py-2 w-full max-w-xs focus:outline-none focus:ring-2 focus:ring-green-400"
+        />
       </div>
 
      

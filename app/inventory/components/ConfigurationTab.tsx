@@ -76,7 +76,10 @@ export function ConfigureTab() {
   const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null);
   const [isEditDiscountOpen, setIsEditDiscountOpen] = useState(false);
 
- 
+   const [catSearch, setCatSearch] = useState("");
+  const [catPage, setCatPage] = useState(1);
+  const catRowsPerPage = 10;
+
   const [selectedProduct, setSelectedProduct] = useState("");
   const [selectedDiscount, setSelectedDiscount] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
@@ -279,7 +282,7 @@ export function ConfigureTab() {
 
     try {
       const token = getToken();
-      const response = await fetch(`${apiUrl}/categories/${id}`, {
+      const response = await fetch(`${apiUrl}/configure/categories/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -714,48 +717,88 @@ export function ConfigureTab() {
                 <CardDescription>Manage product categories</CardDescription>
               </CardHeader>
               <CardContent>
+                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
+                  <Input
+                    placeholder="Search categories..."
+                    value={catSearch}
+                    onChange={e => {
+                      setCatSearch(e.target.value);
+                      setCatPage(1);
+                    }}
+                    className="max-w-xs"
+                  />
+                </div>
                 {loadingCategories ? (
                   <div className="flex items-center justify-center p-4">
                     <Loader className="h-6 w-6 animate-spin" />
                   </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Category</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {categories.map((cat) => (
-                        <TableRow key={cat.id}>
-                          <TableCell className="font-medium">{cat.name}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => {
-                                  setEditingCategory(cat);
-                                  setIsEditCatOpen(true);
-                                }}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="text-red-600"
-                                onClick={() => handleDeleteCategory(cat.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
+                   <>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Category</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {categories
+                          .filter(cat => cat.name.toLowerCase().includes(catSearch.toLowerCase()))
+                          .slice((catPage - 1) * catRowsPerPage, catPage * catRowsPerPage)
+                          .map((cat) => (
+                            <TableRow key={cat.id}>
+                              <TableCell className="font-medium">{cat.name}</TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex justify-end gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => {
+                                      setEditingCategory(cat);
+                                      setIsEditCatOpen(true);
+                                    }}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-red-600"
+                                    onClick={() => handleDeleteCategory(cat.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
+                 
+                    <div className="flex justify-between items-center mt-4">
+                      <span className="text-xs text-gray-400">
+                        Page {catPage} of {Math.max(1, Math.ceil(categories.filter(cat => cat.name.toLowerCase().includes(catSearch.toLowerCase())).length / catRowsPerPage))}
+                      </span>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={catPage === 1}
+                          onClick={() => setCatPage(p => Math.max(1, p - 1))}
+                        >
+                          Previous
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={catPage >= Math.ceil(categories.filter(cat => cat.name.toLowerCase().includes(catSearch.toLowerCase())).length / catRowsPerPage)}
+                          onClick={() => setCatPage(p => p + 1)}
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>
