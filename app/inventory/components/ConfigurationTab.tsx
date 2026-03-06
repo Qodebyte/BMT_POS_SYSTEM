@@ -157,7 +157,7 @@ export function ConfigureTab() {
 
     try {
       const token = getToken();
-      const response = await fetch(`${apiUrl}/attributes/${id}`, {
+      const response = await fetch(`${apiUrl}/configure/attributes/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
