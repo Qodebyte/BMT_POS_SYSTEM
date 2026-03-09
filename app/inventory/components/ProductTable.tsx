@@ -155,16 +155,9 @@ export function ProductTable({ searchQuery }: { searchQuery: string }) {
 
 
  
-  const filteredProducts = products.filter(product => {
-    const matchesCategory =
-      activeCategory === "All" || product.category?.name === activeCategory;
-
-    const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.brand.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return matchesCategory && matchesSearch;
-  });
+const filteredProducts = products.filter(product =>
+  activeCategory === "All" || product.category?.name === activeCategory
+);
 
   const handleDelete = (productId: number, productName: string) => {
   toast.custom((toastId) => (
