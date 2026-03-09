@@ -61,6 +61,10 @@ export function ProductTable({ searchQuery }: { searchQuery: string }) {
 
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       setError(null);
@@ -72,15 +76,18 @@ export function ProductTable({ searchQuery }: { searchQuery: string }) {
         }
 
         const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.bmtpossystem.com/api';
-        const response = await fetch(
-          `${apiUrl}/products?page=${currentPage}&limit=${limit}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        let url = `${apiUrl}/products?page=${currentPage}&limit=${limit}`;
+        
+        if (searchQuery.trim()) {
+          url += `&search=${encodeURIComponent(searchQuery)}`;
+        }
+
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
         if (!response.ok) {
           throw new Error('Failed to fetch products');
@@ -105,7 +112,7 @@ export function ProductTable({ searchQuery }: { searchQuery: string }) {
     };
 
     fetchProducts();
-  }, [currentPage]);
+  }, [currentPage, searchQuery]);
 
  
   const formatCurrency = (value: number) => {

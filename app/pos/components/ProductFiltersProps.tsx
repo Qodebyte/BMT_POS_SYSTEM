@@ -161,7 +161,9 @@ export function ProductFilters({
         v =>
           v.sku.toLowerCase().includes(query) ||
           v.barcode.toLowerCase().includes(query) ||
-          v.product_name.toLowerCase().includes(query)
+          v.product_name.toLowerCase().includes(query) ||
+          v.brand.toLowerCase().includes(query) ||
+          v.category.toLowerCase().includes(query)
       );
     }
 
@@ -189,7 +191,7 @@ export function ProductFilters({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search by name, SKU, barcode..."
+              placeholder="Search by name, brand, category, SKU, barcode..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className='border border-gray-900 pl-9'
@@ -204,7 +206,7 @@ export function ProductFilters({
             <SelectTrigger className='border border-gray-900'>
               <SelectValue placeholder={isLoading ? "Loading..." : "All Brands"} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-48 overflow-y-auto">
               <SelectItem value="all">All Brands</SelectItem>
               {displayBrands.map(brand => (
                 <SelectItem key={brand} value={brand}>{brand}</SelectItem>
@@ -219,7 +221,7 @@ export function ProductFilters({
             <SelectTrigger className='border border-gray-900'>
               <SelectValue placeholder={isLoading ? "Loading..." : "All Categories"} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-48 overflow-y-auto">
               <SelectItem value="all">All Categories</SelectItem>
               {displayCategories.map(category => (
                 <SelectItem key={category.id} value={category.name}>
@@ -236,7 +238,7 @@ export function ProductFilters({
             <SelectTrigger className='border border-gray-900'>
               <SelectValue placeholder={isLoading ? "Loading..." : "All Products"} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-48 overflow-y-auto">
               <SelectItem value="all">All Products</SelectItem>
               {productsToDisplay.map((product) => (
                 <SelectItem key={product.id} value={String(product.id)}>
