@@ -94,7 +94,7 @@ export function useVariants(): UseVariantsResponse {
         product_id: item.product?.id,
         product_name: item.product?.name,
         brand: item.product?.brand,
-        category: item.product?.category?.name || 'uncategorized',
+        category: (item.product?.category?.name || 'uncategorized').trim(),
         selling_price: parseFloat(String(item.pricing?.selling_price || 0)),
         cost_price: parseFloat(String(item.pricing?.cost_price || 0)),
         quantity: item.stock?.quantity || 0,
