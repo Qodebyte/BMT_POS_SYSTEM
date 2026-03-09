@@ -144,60 +144,51 @@ export function ProductFilters({
     fetchFilterOptions();
   }, [products]);
 
-  // Filter variants based on selected filters
-  useEffect(() => {
-    if (!variants.length) return;
 
+  useEffect(() => {
     let filteredVariants = [...variants];
 
-    // Filter by product
-    if (selectedProduct && selectedProduct !== 'all') {
-      filteredVariants = filteredVariants.filter(
-        v => String(v.product_id) === selectedProduct
-      );
-    }
 
-    // Filter by brand
-    if (selectedBrand && selectedBrand !== 'all') {
-      filteredVariants = filteredVariants.filter(
-        v => v.brand === selectedBrand
-      );
-    }
+   if (selectedProduct && selectedProduct !== 'all') {
+    filteredVariants = filteredVariants.filter(
+      v => String(v.product_id) === selectedProduct
+    );
+  }
 
-    // Filter by category
-    if (selectedCategory && selectedCategory !== 'all') {
-      filteredVariants = filteredVariants.filter(
-        v => v.category === selectedCategory
-      );
-    }
+  if (selectedBrand && selectedBrand !== 'all') {
+    filteredVariants = filteredVariants.filter(
+      v => v.brand?.trim().toLowerCase() === selectedBrand.trim().toLowerCase()
+    );
+  }
 
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filteredVariants = filteredVariants.filter(v => {
-        const categoryName = typeof v.category === 'string' ? v.category : '';
-        return (
-          v.sku.toLowerCase().includes(query) ||
-          v.barcode.toLowerCase().includes(query) ||
-          v.product_name.toLowerCase().includes(query) ||
-          v.brand.toLowerCase().includes(query) ||
-          categoryName.toLowerCase().includes(query)
-        );
-      });
-    }
 
-    // Call parent callback with filtered variants
+
+ if (selectedCategory && selectedCategory !== 'all') {
+    filteredVariants = filteredVariants.filter(
+      v => v.category?.trim().toLowerCase() === selectedCategory.trim().toLowerCase()
+    );
+  }
+
+
+  if (searchQuery.trim()) {
+    const query = searchQuery.toLowerCase().trim();
+    filteredVariants = filteredVariants.filter(v =>
+      v.sku?.toLowerCase().includes(query) ||
+      v.barcode?.toLowerCase().includes(query) ||
+      v.product_name?.toLowerCase().includes(query) ||
+      v.brand?.toLowerCase().includes(query) ||
+      v.category?.toLowerCase().includes(query)
+    );
+  }
+
     onVariantsChange?.(filteredVariants);
-  }, [variants, selectedProduct, selectedBrand, selectedCategory, searchQuery, onVariantsChange]);
+  }, [variants, selectedProduct, selectedBrand, selectedCategory, searchQuery]);
 
   const productsToDisplay = fetchedProducts.length > 0 ? fetchedProducts : products;
   const displayBrands = brands.length > 0 ? brands : Array.from(new Set(products.map(p => p.brand).filter(Boolean))) as string[];
-  const displayCategories = categories.length > 0
-    ? categories
-    : Array.from(new Set(products.map(p => typeof p.category === 'string' ? p.category : p.category?.name))).map((cat, idx) => ({
-      id: idx,
-      name: cat as string,
-    }));
+ const displayCategories = Array.from(
+  new Set(variants.map(v => v.category).filter(Boolean))
+).sort().map((name, idx) => ({ id: idx, name: name as string }));
 
   const isLoading = loadingFilters || variantsLoading;
 
