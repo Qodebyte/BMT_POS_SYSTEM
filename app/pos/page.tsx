@@ -18,7 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { BarcodeScanner } from './components/BarcodeScanner';
 import { useProducts } from './components/useProduct';
-import { VariantWithProduct } from './components/useVariants';
+import { useVariants, VariantWithProduct } from './components/useVariants';
 import { useDiscounts } from './components/useDiscount';
 import { useOfflineSync } from './components/useOfflineSync';
 import { useWalkInCustomer } from './components/useWalkInCustomer';
@@ -42,9 +42,11 @@ export default function POSPage() {
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
   const [isScannerProcessing, setIsScannerProcessing] = useState<boolean>(false);
   const [filteredVariants, setFilteredVariants] = useState<VariantWithProduct[]>([]);
+  const [allVariants, setAllVariants] = useState<VariantWithProduct[]>([]);
   const [adminData, setAdminData] = useState<AdminData | null>(null);
 
   const { products } = useProducts();
+  const { variants: variantsFromHook } = useVariants();
   const { getDiscountForProduct, isDiscountActive } = useDiscounts();
   const { walkInCustomer, refetchWalkInCustomer } = useWalkInCustomer();
   const { refetch: refetchCustomers } = useCustomers();
@@ -104,6 +106,11 @@ const calculateManualDiscount = () => {
     }
     setIsHydrated(true);
   }, []);
+
+  // Sync all variants from hook
+  useEffect(() => {
+    setAllVariants(variantsFromHook);
+  }, [variantsFromHook]);
 
   const handleTaxRateChange = (newRate: number) => {
     setTaxRate(newRate);
@@ -310,7 +317,9 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
     setIsScannerProcessing(true);
     
     try {
-      const variant = filteredVariants.find(v => v.barcode === barcode);
+      // Search in ALL variants, not just filtered ones
+      const trimmedBarcode = barcode.trim().toLowerCase();
+      const variant = allVariants.find(v => v.barcode.trim().toLowerCase() === trimmedBarcode);
       
       if (!variant) {
         toast.error(`Barcode not found: ${barcode}`);

@@ -100,7 +100,7 @@ export function useVariants(): UseVariantsResponse {
         return {
           variant_id: item.variant_id,
           sku: item.sku,
-          barcode: item.barcode,
+          barcode: String(item.barcode || '').trim(),
           product_id: item.product?.id,
           product_name: item.product?.name,
           brand: item.product?.brand,
