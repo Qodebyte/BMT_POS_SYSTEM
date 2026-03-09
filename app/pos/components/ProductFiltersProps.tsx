@@ -144,51 +144,65 @@ export function ProductFilters({
     fetchFilterOptions();
   }, [products]);
 
-
+  // Filter variants based on selected filters
   useEffect(() => {
+    if (!variants.length) return;
+
     let filteredVariants = [...variants];
 
+    // Filter by product
+    if (selectedProduct && selectedProduct !== 'all') {
+      filteredVariants = filteredVariants.filter(
+        v => String(v.product_id) === selectedProduct
+      );
+    }
 
-   if (selectedProduct && selectedProduct !== 'all') {
-    filteredVariants = filteredVariants.filter(
-      v => String(v.product_id) === selectedProduct
-    );
-  }
+    // Filter by brand
+    if (selectedBrand && selectedBrand !== 'all') {
+      filteredVariants = filteredVariants.filter(
+        v => v.brand === selectedBrand
+      );
+    }
 
-  if (selectedBrand && selectedBrand !== 'all') {
-    filteredVariants = filteredVariants.filter(
-      v => v.brand?.trim().toLowerCase() === selectedBrand.trim().toLowerCase()
-    );
-  }
+    // Filter by category
+    if (selectedCategory && selectedCategory !== 'all') {
+      filteredVariants = filteredVariants.filter(
+        v => String(v.category).toLowerCase() === selectedCategory.toLowerCase()
+      );
+    }
 
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filteredVariants = filteredVariants.filter(v => {
+        return (
+          v.sku.toLowerCase().includes(query) ||
+          v.barcode.toLowerCase().includes(query) ||
+          v.product_name.toLowerCase().includes(query) ||
+          v.brand.toLowerCase().includes(query) ||
+          String(v.category).toLowerCase().includes(query)
+        );
+      });
+    }
 
-
- if (selectedCategory && selectedCategory !== 'all') {
-    filteredVariants = filteredVariants.filter(
-      v => v.category?.trim().toLowerCase() === selectedCategory.trim().toLowerCase()
-    );
-  }
-
-
-  if (searchQuery.trim()) {
-    const query = searchQuery.toLowerCase().trim();
-    filteredVariants = filteredVariants.filter(v =>
-      v.sku?.toLowerCase().includes(query) ||
-      v.barcode?.toLowerCase().includes(query) ||
-      v.product_name?.toLowerCase().includes(query) ||
-      v.brand?.toLowerCase().includes(query) ||
-      v.category?.toLowerCase().includes(query)
-    );
-  }
-
+    // Call parent callback with filtered variants
     onVariantsChange?.(filteredVariants);
-  }, [variants, selectedProduct, selectedBrand, selectedCategory, searchQuery]);
+  }, [variants, selectedProduct, selectedBrand, selectedCategory, searchQuery, onVariantsChange]);
 
   const productsToDisplay = fetchedProducts.length > 0 ? fetchedProducts : products;
   const displayBrands = brands.length > 0 ? brands : Array.from(new Set(products.map(p => p.brand).filter(Boolean))) as string[];
- const displayCategories = Array.from(
-  new Set(variants.map(v => v.category).filter(Boolean))
-).sort().map((name, idx) => ({ id: idx, name: name as string }));
+  
+  // Get categories from actual variants data, combined with API categories
+  const variantCategories = Array.from(
+    new Set(variants.map(v => v.category).filter(Boolean))
+  ).sort();
+  
+  const displayCategories = [
+    ...(categories.length > 0 ? categories : []),
+    ...variantCategories
+      .filter(vc => !categories.some(c => c.name === vc))
+      .map((cat, idx) => ({ id: `variant-${idx}`, name: cat }))
+  ].filter((cat, idx, self) => self.findIndex(c => c.name === cat.name) === idx);
 
   const isLoading = loadingFilters || variantsLoading;
 

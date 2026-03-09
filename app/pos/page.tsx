@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import {Clock, User} from "lucide-react";
 import { AdminData, CartItem, Customer, Draft, Product, ProductVariant } from '../utils/type';
@@ -83,9 +83,7 @@ const calculateManualDiscount = () => {
 
 
 
-const handleVariantsChange = useCallback((variants: VariantWithProduct[]) => {
-  setFilteredVariants(variants);
-}, []);
+
 
   useEffect(() => {
       const storedAdminData = localStorage.getItem('adminDetail');
@@ -408,7 +406,7 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
             onCategoryChange={setSelectedCategory}
             onProductChange={setSelectedProduct}
             onSearchChange={setSearchQuery}
-            onVariantsChange={handleVariantsChange}
+            onVariantsChange={setFilteredVariants}
           />
             
           <ProductGrid

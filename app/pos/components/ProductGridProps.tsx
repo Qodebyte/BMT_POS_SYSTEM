@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,10 +18,6 @@ interface ProductGridProps {
 export function ProductGrid({ variants, onAddToCart }: ProductGridProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
-  useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  setCurrentPage(1);
-}, [variants]);
    const totalPages = Math.ceil(variants.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedVariants = variants.slice(startIndex, startIndex + itemsPerPage);

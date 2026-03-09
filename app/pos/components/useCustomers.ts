@@ -40,7 +40,7 @@ export function useCustomers(): UseCustomersResponse {
       }
 
       const data = await response.json();
-      console.log('Fetched customers:', data);
+   
 
        const mappedCustomers: Customer[] = (data.customers || []).map((c: Customer) => {
         // Ensure is_walk_in flag is properly set
@@ -55,7 +55,7 @@ export function useCustomers(): UseCustomersResponse {
           is_walk_in: isWalkIn,
         };
       });
-      console.log('Mapped customers:', mappedCustomers);
+ 
       setCustomers(mappedCustomers);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
