@@ -87,22 +87,33 @@ export function useVariants(): UseVariantsResponse {
       const variantsList = result.variants || [];
 
     
-      const transformedVariants: VariantWithProduct[] = variantsList.map((item: VariantApiResponse) => ({
-        variant_id: item.variant_id,
-        sku: item.sku,
-        barcode: item.barcode,
-        product_id: item.product?.id,
-        product_name: item.product?.name,
-        brand: item.product?.brand,
-        category: (item.product?.category?.name || 'uncategorized').trim(),
-        selling_price: parseFloat(String(item.pricing?.selling_price || 0)),
-        cost_price: parseFloat(String(item.pricing?.cost_price || 0)),
-        quantity: item.stock?.quantity || 0,
-        threshold: item.stock?.threshold || 0,
-        taxable: item.product?.taxable || false,
-        image_url: item.media?.images || [],
-        attributes: item.attributes || {},
-      }));
+      const transformedVariants: VariantWithProduct[] = variantsList.map((item: VariantApiResponse) => {
+      
+        let categoryName = 'uncategorized';
+        if (item.product?.category?.name) {
+          categoryName = String(item.product.category.name).trim();
+          if (!categoryName) {
+            categoryName = 'uncategorized';
+          }
+        }
+
+        return {
+          variant_id: item.variant_id,
+          sku: item.sku,
+          barcode: item.barcode,
+          product_id: item.product?.id,
+          product_name: item.product?.name,
+          brand: item.product?.brand,
+          category: categoryName,
+          selling_price: parseFloat(String(item.pricing?.selling_price || 0)),
+          cost_price: parseFloat(String(item.pricing?.cost_price || 0)),
+          quantity: item.stock?.quantity || 0,
+          threshold: item.stock?.threshold || 0,
+          taxable: item.product?.taxable || false,
+          image_url: item.media?.images || [],
+          attributes: item.attributes || {},
+        };
+      });
 
       setVariants(transformedVariants);
     } catch (err) {

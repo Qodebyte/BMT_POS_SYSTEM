@@ -166,9 +166,11 @@ export function ProductFilters({
 
   
     if (selectedCategory && selectedCategory !== 'all') {
-      filteredVariants = filteredVariants.filter(
-        v => (v.category?.trim() || '').toLowerCase() === selectedCategory.toLowerCase().trim()
-      );
+      const selectedCatTrimmed = String(selectedCategory).toLowerCase().trim();
+      filteredVariants = filteredVariants.filter(v => {
+        const variantCatTrimmed = String(v.category || '').toLowerCase().trim();
+        return variantCatTrimmed === selectedCatTrimmed;
+      });
     }
 
 
@@ -180,7 +182,7 @@ export function ProductFilters({
           v.barcode.toLowerCase().includes(query) ||
           v.product_name.toLowerCase().includes(query) ||
           v.brand.toLowerCase().includes(query) ||
-          (v.category?.trim() || '').toLowerCase().includes(query)
+          String(v.category || '').toLowerCase().includes(query)
         );
       });
     }
@@ -192,12 +194,16 @@ export function ProductFilters({
   const productsToDisplay = fetchedProducts.length > 0 ? fetchedProducts : products;
   const displayBrands = brands.length > 0 ? brands : Array.from(new Set(products.map(p => p.brand).filter(Boolean))) as string[];
   
-  
+
   const variantCategories = Array.from(
     new Set(
       variants
-        .map(v => v.category?.trim())
-        .filter(Boolean)
+        .map(v => {
+          if (!v.category) return null;
+          const trimmed = String(v.category).trim();
+          return trimmed && trimmed !== '' ? trimmed : null;
+        })
+        .filter((cat): cat is string => cat !== null)
     )
   ).sort() as string[];
   
