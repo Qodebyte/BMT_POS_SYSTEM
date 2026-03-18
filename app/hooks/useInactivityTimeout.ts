@@ -1,0 +1,95 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+
+const INACTIVITY_TIMEOUT = 30 * 60 * 1000; 
+const WARNING_TIME = 25 * 60 * 1000; 
+
+export function useInactivityTimeout(onWarning?: () => void) {
+  const router = useRouter();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastActivityRef = useRef<number>(0);
+
+  const handleLogout = () => {
+   
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminDetail');
+
+ 
+    router.push('/auth/login');
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      return;
+    }
+
+
+    lastActivityRef.current = Date.now();
+
+    const resetInactivityTimer = () => {
+      lastActivityRef.current = Date.now();
+
+      
+      if (warningTimeoutRef.current) {
+        clearTimeout(warningTimeoutRef.current);
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      warningTimeoutRef.current = setTimeout(() => {
+        if (onWarning) {
+          onWarning();
+        }
+      }, WARNING_TIME);
+
+      
+      timeoutRef.current = setTimeout(() => {
+        handleLogout();
+      }, INACTIVITY_TIMEOUT);
+    };
+
+    resetInactivityTimer();
+
+    const activityEvents = [
+      'mousedown',
+      'keydown',
+      'scroll',
+      'touchstart',
+      'click',
+    ];
+
+    const handleActivity = () => {
+      resetInactivityTimer();
+    };
+
+  
+    activityEvents.forEach((event) => {
+      document.addEventListener(event, handleActivity);
+    });
+
+ 
+    return () => {
+   
+      activityEvents.forEach((event) => {
+        document.removeEventListener(event, handleActivity);
+      });
+
+  
+      if (warningTimeoutRef.current) {
+        clearTimeout(warningTimeoutRef.current);
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [router]);
+
+  return {
+    handleLogout,
+  };
+}

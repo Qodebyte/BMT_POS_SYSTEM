@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from '@/components/ui/sonner';
+import { InactivityProvider } from './components/InactivityProvider';
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -23,9 +24,11 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-sans bg-black text-white antialiased`}
       >
-        <main className="min-h-screen">
-          {children}
-        </main>
+        <InactivityProvider>
+          <main className="min-h-screen">
+            {children}
+          </main>
+        </InactivityProvider>
         <Toaster />
       </body>
     </html>
