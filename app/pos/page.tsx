@@ -34,6 +34,10 @@ import { hasPermission } from '../utils/permission';
 
 export default function POSPage() {
   useEffect(() => {
+
+    const savedSessionTime = parseInt(localStorage.getItem('pos_session_time') || '0', 10);
+    setSessionTime(savedSessionTime);
+    
     OfflineTransactionManager.cleanupOldRetries();
     OfflineTransactionManager.cleanupLocalTransactions();
   }, []);
@@ -43,9 +47,7 @@ export default function POSPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [itemDiscountToggles, setItemDiscountToggles] = useState<Record<string, boolean>>({});
   const [purchaseType, setPurchaseType] = useState<'in-store' | 'online'>('in-store');
-  const [sessionTime, setSessionTime] = useState(
-  parseInt(localStorage.getItem('pos_session_time') || '0', 10)
-  );
+  const [sessionTime, setSessionTime] = useState<number>(0);
   const [showCreateCustomer, setShowCreateCustomer] = useState<boolean>(false);
   const [showLoadDraft, setShowLoadDraft] = useState<boolean>(false);
   const [showCheckout, setShowCheckout] = useState<boolean>(false);
