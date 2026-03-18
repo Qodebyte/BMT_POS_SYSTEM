@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import {Clock, User} from "lucide-react";
-import { AdminData, CartItem, Customer, Draft, Product, ProductVariant } from '../utils/type';
+import {Clock, LogOut, User} from "lucide-react";
+import { AdminDetail, CartItem, Customer, Draft, Product, ProductVariant } from '../utils/type';
 import { LoadDraftModal } from './components/LoadDraftModal';
 import { CreateCustomerModal } from './components/CreateCustomerModal';
 import { CartSidebar } from './components/CartSidebarProps';
 import { ProductGrid } from './components/ProductGridProps';
 import { ProductFilters } from './components/ProductFiltersProps';
+import { Home, Package, ShoppingCart, DollarSign, Users, Settings, Workflow } from "lucide-react";
 import { POSHeader } from './components/POSHeader';
 import { NetworkStatus } from './components/NetworkStatus';
 import { CheckoutModal } from './components/CheckoutModalProps';
@@ -26,6 +27,10 @@ import { useCustomers } from './components/useCustomers';
 import { parse } from 'path';
 import { parseImageUrl } from '../utils/imageHelper';
 import { OfflineTransactionManager } from './components/OfflineTransactionManager';
+import { useRouter } from 'next/navigation';
+import { PageDropDown } from './components/PageDropDown';
+import { hasPermission } from '../utils/permission';
+
 
 export default function POSPage() {
   useEffect(() => {
@@ -38,7 +43,9 @@ export default function POSPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [itemDiscountToggles, setItemDiscountToggles] = useState<Record<string, boolean>>({});
   const [purchaseType, setPurchaseType] = useState<'in-store' | 'online'>('in-store');
-  const [sessionTime, setSessionTime] = useState<number>(0);
+  const [sessionTime, setSessionTime] = useState(
+  parseInt(localStorage.getItem('pos_session_time') || '0', 10)
+  );
   const [showCreateCustomer, setShowCreateCustomer] = useState<boolean>(false);
   const [showLoadDraft, setShowLoadDraft] = useState<boolean>(false);
   const [showCheckout, setShowCheckout] = useState<boolean>(false);
@@ -48,7 +55,16 @@ export default function POSPage() {
   const [isScannerProcessing, setIsScannerProcessing] = useState<boolean>(false);
   const [filteredVariants, setFilteredVariants] = useState<VariantWithProduct[]>([]);
   const [allVariants, setAllVariants] = useState<VariantWithProduct[]>([]);
-  const [adminData, setAdminData] = useState<AdminData | null>(null);
+  const [adminData, setAdminData] = useState<AdminDetail | null>(null);
+      const navigation = [
+        { name: "Dashboard", href: "/dashboard", icon: Home, permissions: ["view_inventory","view_expenses","view_customer","view_staff","view_settings","view_login_attempts"] },
+        { name: "Inventory", href: "/inventory", icon: Package, permissions: ["view_inventory"] },
+        { name: "Sales", href: "/sales", icon: ShoppingCart, permissions: ["view_sales"] },
+        { name: "Finance", href: "/expenses", icon: DollarSign, permissions: ["view_expenses"] },
+        { name: "Customers", href: "/customers", icon: Users, permissions: ["view_customer"] },
+        { name: "Staffs", href: "/staffs", icon: Workflow, permissions: ["view_staff"] },
+        { name: "Settings", href: "/settings", icon: Settings, permissions: ["view_settings"] },
+      ];
 
   const { products } = useProducts();
   const { variants: variantsFromHook } = useVariants();
@@ -96,7 +112,7 @@ const calculateManualDiscount = () => {
       const storedAdminData = localStorage.getItem('adminDetail');
     if (storedAdminData) {
       try {
-        const parsedAdminData: AdminData = JSON.parse(storedAdminData);
+        const parsedAdminData: AdminDetail = JSON.parse(storedAdminData);
         setAdminData(parsedAdminData);
         console.log('Admin data loaded:', parsedAdminData);
       } catch (error) {
@@ -155,10 +171,11 @@ const calculateManualDiscount = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       setSessionTime(prev => prev + 1);
+      localStorage.setItem('pos_session_time', (sessionTime + 1).toString());
     }, 1000);
     
     return () => clearInterval(timer);
-  }, []);
+  }, [sessionTime]);
 
   const formatTime = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
@@ -317,6 +334,16 @@ const totalDiscount = autoDiscount + manualDiscountAmount;
 
 const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
 
+ const router = useRouter();
+
+  const handleSignOut = () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminDetail');
+    router.push('/auth/login');
+  };
+
+
+
 
   const handleBarcodeScanned = async (barcode: string) => {
     setIsScannerProcessing(true);
@@ -370,6 +397,12 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <NetworkStatus />
+         
+            <PageDropDown
+              pages={navigation.filter(item =>
+                !item.permissions || hasPermission(adminData?.permissions, item.permissions)
+              )}
+            />
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Clock className="h-4 w-4" />
               Session: {formatTime(sessionTime)}
@@ -392,6 +425,13 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
               />
               <span className="text-sm hidden">%</span>
             </div>
+             <button
+            onClick={handleSignOut}
+            className="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors mt-2"
+          >
+            <LogOut className="h-5 w-5" />
+            Sign Out
+          </button>
           </div>
           
           <Button 
