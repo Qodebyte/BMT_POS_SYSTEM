@@ -381,6 +381,11 @@ const handlePrintReceipt = (receipt: ReceiptTransaction) => {
 
 const ApiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.bmtpossystem.com/api";
 
+ const adminToken = localStorage.getItem("adminToken");
+  if (!adminToken) {
+    throw new Error("No authentication token found");
+  }
+
 const handleDeleteClick = (sale: Sale) => {
   setSelectedSaleForDelete(sale);
   setDeleteDialogOpen(true);
@@ -395,6 +400,7 @@ const confirmDelete = async () => {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${adminToken}`,
       },
     });
 
