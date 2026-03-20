@@ -1351,13 +1351,24 @@ useEffect(() => {
           >
             Cancel Order
           </Button>
-            <Button
-              className="bg-green-400 hover:bg-green-500 text-black"
-              onClick={handleCompleteSale}
-              disabled={useInstallments && parseFloat(amountPaid) < installmentPlan.downPayment}
-            >
-              {useInstallments ? 'Start Installment Plan' : 'Complete Sale'}
-            </Button>
+           <Button
+        className="bg-green-400 hover:bg-green-500 text-black"
+        onClick={handleCompleteSale}
+        disabled={
+          isSyncing || 
+          createSaleLoading ||
+          (useInstallments && parseFloat(amountPaid) < installmentPlan.downPayment)
+        }
+      >
+        {isSyncing || createSaleLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          useInstallments ? 'Start Installment Plan' : 'Complete Sale'
+        )}
+      </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
