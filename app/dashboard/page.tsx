@@ -140,7 +140,7 @@ const [rejectedLogins, setRejectedLogins] = useState();
     const loginsArray = data.data || [];
 
       const pendingCount = loginsArray.filter((login: LoginAttemptType) => login.status === 'pending').length;
-    const successfulCount = loginsArray.filter((login: LoginAttemptType) => login.status === 'completed' || login.status === 'approved').length;
+    const successfulCount = loginsArray.filter((login: LoginAttemptType) => login.status === 'completed').length;
     const approvedCount = loginsArray.filter((login: LoginAttemptType) => login.status === 'approved').length;
     const rejectedCount = loginsArray.filter((login: LoginAttemptType) => login.status === 'rejected').length;
 
@@ -760,29 +760,6 @@ const handleRejectLogin = async (id: string) => {
 
    
     <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-gray-400">Total Logins</p>
-            <p id='total-logins' className="text-2xl font-semibold text-white">-</p>
-          </div>
-          <div className="h-10 w-10 rounded-full bg-blue-900/30 flex items-center justify-center">
-            <span className="text-lg">👥</span>
-          </div>
-        </div>
-      </div>
-      
-      <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-gray-400">Successful Logins</p>
-            <p id='successful-logins' className="text-2xl font-semibold text-green-300">-</p>
-          </div>
-          <div className="h-10 w-10 rounded-full bg-green-900/30 flex items-center justify-center">
-            <span className="text-lg">✅</span>
-          </div>
-        </div>
-      </div>
       
     <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
   <div className="flex items-center justify-between">
