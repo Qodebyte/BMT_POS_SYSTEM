@@ -185,7 +185,13 @@ export function TransactionsTab({
     const fetchSales = async () => {
       try {
         setLoading(true);
-        const res = await getSales(dateRange.filter, currentPage, ITEMS_PER_PAGE);
+        const res = await getSales(
+          dateRange.filter, 
+          currentPage, 
+          ITEMS_PER_PAGE,
+          dateRange.startDate,
+          dateRange.endDate
+        );
         setSales(res.sales);
         setTotalPages(res.totalPages);
       } catch (err) {

@@ -196,7 +196,9 @@ export interface GetSalesResponse {
 export async function getSales(
   filter: string = "today",
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
+  startDate?: string,
+  endDate?: string
 ): Promise<GetSalesResponse> {
   if (typeof window === "undefined") {
     throw new Error("getSales must be called on the client");
@@ -207,9 +209,17 @@ export async function getSales(
     throw new Error("No authentication token found");
   }
 
+  const params = new URLSearchParams({ 
+    filter, 
+    page: page.toString(), 
+    limit: limit.toString() 
+  });
 
-  const params = new URLSearchParams({ filter, page: page.toString(), limit: limit.toString() });
 
+  if (filter === 'custom' && startDate && endDate) {
+    params.append("start_date", startDate);
+    params.append("end_date", endDate);
+  }
 
   const res = await fetch(
     `${API_BASE}/sales?${params}`,
