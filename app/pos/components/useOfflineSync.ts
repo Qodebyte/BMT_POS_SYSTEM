@@ -3,6 +3,7 @@
 import { useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { OfflineTransactionManager } from './OfflineTransactionManager';
+import { OfflineInventoryManager } from './OfflineInventoryManager';
 import { useSales, type CreateSalePayload, type SaleResponse } from './useSales';
 
 export interface UseOfflineSyncReturn {
@@ -121,7 +122,7 @@ export function useOfflineSync(onWalkInSynced?: () => Promise<void>): UseOffline
   failureCount++;
   const errorMessage = error instanceof Error ? error.message : 'Unknown error';
  
-   const isInventoryError = errorMessage.includes('stock') || errorMessage.includes('Insufficient');
+  const isInventoryError = errorMessage.includes('stock') || errorMessage.includes('Insufficient');
   const isDuplicateError = errorMessage.includes('already exists') || errorMessage.includes('duplicate');
   const isValidationError = errorMessage.includes('validation') || 
                            errorMessage.includes('required') || 
@@ -137,13 +138,20 @@ export function useOfflineSync(onWalkInSynced?: () => Promise<void>): UseOffline
     OfflineTransactionManager.markAsSynced(transaction.id);
     successCount++;
   } else if (isInventoryError) {
-    console.warn(`📦 Inventory conflict for ${transaction.id}. Will retry when stock available.`);
-    OfflineTransactionManager.markSyncAttempt(transaction.id, errorMessage);
+    console.warn(
+      `📦 Inventory conflict for transaction ${transaction.id}.\n` +
+      `Error: ${errorMessage}\n` +
+      `This might happen if:\n` +
+      `- Stock was sold by another terminal since you created this sale\n` +
+      `- Stock levels changed during offline mode\n` +
+      `Retrying when stock becomes available...`
+    );
+    OfflineTransactionManager.markSyncAttempt(transaction.id, `Inventory: ${errorMessage}`);
   } else if (isValidationError) {
-    console.error(`❌ Validation error in ${transaction.id}: ${errorMessage}`);
-    OfflineTransactionManager.markAsFailed(transaction.id, errorMessage);
+    console.error(`❌ Validation error in transaction ${transaction.id}: ${errorMessage}`);
+    OfflineTransactionManager.markAsFailed(transaction.id, `Validation: ${errorMessage}`);
   } else {
-    console.warn(`⚠️ Temporary error syncing ${transaction.id}: ${errorMessage}`);
+    console.warn(`⚠️ Temporary error syncing transaction ${transaction.id}: ${errorMessage}`);
     OfflineTransactionManager.markSyncAttempt(transaction.id, errorMessage);
   }
   
@@ -166,6 +174,10 @@ export function useOfflineSync(onWalkInSynced?: () => Promise<void>): UseOffline
       toast.success(`✅ Synced ${successCount} transaction(s)`, {
         description: `${failureCount} transaction(s) will be retried later`,
       });
+      
+  
+      OfflineInventoryManager.resetSnapshot();
+      console.log('✅ Offline inventory snapshot cleared after successful sync');
     }
 
     if (failureCount > 0) {

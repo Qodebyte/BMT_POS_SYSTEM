@@ -27,6 +27,7 @@ import { useCustomers } from './components/useCustomers';
 import { parse } from 'path';
 import { parseImageUrl } from '../utils/imageHelper';
 import { OfflineTransactionManager } from './components/OfflineTransactionManager';
+import { OfflineInventoryManager } from './components/OfflineInventoryManager';
 import { useRouter } from 'next/navigation';
 import { PageDropDown } from './components/PageDropDown';
 import { hasPermission } from '../utils/permission';
@@ -70,7 +71,7 @@ export default function POSPage() {
       ];
 
   const { products } = useProducts();
-  const { variants: variantsFromHook } = useVariants();
+  const { variants: variantsFromHook, refetch: refetchVariants } = useVariants();
   const { getDiscountForProduct, isDiscountActive } = useDiscounts();
   const { walkInCustomer, refetchWalkInCustomer } = useWalkInCustomer();
   const { refetch: refetchCustomers } = useCustomers();
@@ -134,6 +135,10 @@ const calculateManualDiscount = () => {
  
   useEffect(() => {
     setAllVariants(variantsFromHook);
+    // 📦 Save inventory snapshot for offline validation
+    if (variantsFromHook.length > 0) {
+      OfflineInventoryManager.saveInventorySnapshot(variantsFromHook);
+    }
   }, [variantsFromHook]);
 
     useEffect(() => {
@@ -159,6 +164,24 @@ const calculateManualDiscount = () => {
       window.removeEventListener('offline', checkPendingTransactions);
     };
   }, []);
+
+
+  useEffect(() => {
+
+    const stockRefreshInterval = setInterval(async () => {
+      if (navigator.onLine) {
+        console.log('🔄 Refreshing stock data from server...');
+        try {
+          await refetchVariants();
+        } catch (error) {
+          console.warn('⚠️ Failed to refresh stock data:', error);
+
+        }
+      }
+    }, 30000);
+
+    return () => clearInterval(stockRefreshInterval);
+  }, [refetchVariants]);
 
   const handleTaxRateChange = (newRate: number) => {
     setTaxRate(newRate);
@@ -222,16 +245,40 @@ const calculateManualDiscount = () => {
   const handleAddToCart = (variant: VariantWithProduct) => {
     const existingItem = cart.find(item => item.variantId === variant.variant_id);
 
-     const discount = getDiscountForProduct(variant.product_id);
+    const discount = getDiscountForProduct(variant.product_id);
     
+   
+    if (!navigator.onLine) {
+      const offlineCheck = OfflineInventoryManager.canAddToCart(
+        variant.variant_id, 
+        existingItem ? 1 : 1
+      );
+      
+      if (!offlineCheck.canAdd) {
+        toast.error(offlineCheck.reason || 'Cannot add item: offline inventory limit reached');
+        return;
+      }
+    }
     
     if (existingItem) {
+    
+      if (existingItem.quantity + 1 > variant.quantity) {
+        toast.error(`⚠️ Only ${variant.quantity} items available. Already have ${existingItem.quantity} in cart.`);
+        return;
+      }
+      
       setCart(cart.map(item =>
         item.variantId === variant.variant_id
           ? { ...item, quantity: item.quantity + 1 }
           : item
       ));
     } else {
+ 
+      if (variant.quantity <= 0) {
+        toast.error(`❌ ${variant.product_name} is out of stock`);
+        return;
+      }
+      
       setCart([
         ...cart,
         {
@@ -268,7 +315,7 @@ const calculateManualDiscount = () => {
           } : undefined,
         }
       ]);
-      toast.success(`Added: ${variant.product_name}`);
+      toast.success(`✅ Added: ${variant.product_name}`);
     }
   };
 
@@ -277,10 +324,16 @@ const calculateManualDiscount = () => {
       setCart(cart.filter(item => item.id !== itemId));
     } else {
       const cartItem = cart.find(item => item.id === itemId);
-      const variant = filteredVariants.find(v => v.variant_id === cartItem?.variantId);
+    
+      const variant = allVariants.find(v => v.variant_id === cartItem?.variantId);
       
-      if (variant && newQuantity > variant.quantity) {
-        toast.error(`Only ${variant.quantity} items available in stock`);
+      if (!variant) {
+        toast.error('❌ Product not found in inventory');
+        return;
+      }
+      
+      if (newQuantity > variant.quantity) {
+        toast.error(`⚠️ Only ${variant.quantity} items available in stock. Unable to set quantity to ${newQuantity}`);
         return;
       }
 
@@ -293,6 +346,18 @@ const calculateManualDiscount = () => {
   };
 
   const handleRemoveFromCart = (itemId: string) => {
+  
+    const itemToRemove = cart.find(item => item.id === itemId);
+    if (itemToRemove && !navigator.onLine) {
+      OfflineInventoryManager.reverseOfflineSale(
+        itemToRemove.variantId,
+        itemToRemove.quantity
+      );
+      console.log(
+        `↩️ Reversed offline sale: ${itemToRemove.productName} (qty: ${itemToRemove.quantity})`
+      );
+    }
+    
     setCart(cart.filter(item => item.id !== itemId));
   };
 
@@ -566,6 +631,7 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
         totalDiscount={totalDiscount} 
         itemDiscountToggles={itemDiscountToggles} 
         purchaseType={purchaseType}
+        allVariants={allVariants}
         onComplete={() => {
           handleResetCart(); 
           setShowCheckout(false);

@@ -353,15 +353,19 @@ const finalTotal = Math.max(0, total - totalDiscount);
                             <Input
                               type="number"
                               min="1"
+                              max={item.stock}
                               value={item.quantity}
                               onChange={(e) => onUpdateQuantity(item.id, parseInt(e.target.value) || 1)}
                               className="w-16 h-7 text-center border border-gray-100 shadow rounded-xl"
+                              title={`Available stock: ${item.stock}`}
                             />
                             
                             <Button
                               size="sm"
                               className="h-7 w-7 p-0 hover:bg-gray-800 bg-gray-900 text-white"
                               onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                              disabled={item.quantity >= (item.stock ?? Infinity)}
+                              title={item.quantity >= (item.stock ?? Infinity) ? 'Maximum stock reached' : 'Increase quantity'}
                             >
                               <Plus className="h-3 w-3" />
                             </Button>
