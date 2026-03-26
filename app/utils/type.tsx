@@ -167,6 +167,10 @@ export interface OrderItemAPI {
   quantity: number;
   unit_price: number;
   total_price: number;
+  product_name?: string;
+  variant_name?: string;
+  sku?: string;
+  price?: number | string;
   Variant?: {
     sku: string;
     Product?: {

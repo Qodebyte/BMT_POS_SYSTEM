@@ -79,47 +79,8 @@ interface TransactionsTabProps {
 
 
 
-interface OrderItemAPI {
-  id: string;
-  product_id: number;
-  variant_id: number;
-  product_name: string;
-  variant_name: string;
-  sku: string;
-  price: number | string;
-  quantity: number;
-  taxable: boolean;
-  image_url?: string;
-}
+// Replaced by Sale from @/app/utils/type
 
-interface InstallmentPlanAPI {
-  numberOfPayments: number;
-  amountPerPayment: number;
-  paymentFrequency: 'daily' | 'weekly' | 'monthly';
-  startDate: string;
-  notes: string;
-  downPayment: number;
-  remainingBalance: number;
-}
-
-interface OrderAPI {
-  id: string;
-  Customer: {
-    id: string;
-    name: string;
-    email?: string;
-    phone?: string;
-  };
-  OrderItems: OrderItemAPI[];
-  subtotal: number | string;
-  tax: number | string;
-  total_amount: number | string;
-  discount_total: number | string;
-  CreditAccount?: boolean;
-  InstallmentPlan?: InstallmentPlanAPI;
-  OrderPayment?: { method: string }[];
-  createdAt: string;
-}
 
 
 
@@ -130,10 +91,10 @@ function mapSaleToReceipt(sale: Sale): ReceiptTransaction {
     id: item.id,
     productId: Number(item.product_id),
     variantId: Number(item.variant_id),
-    productName: item.Variant?.Product?.name ?? "Unknown", 
-    variantName: item.Variant?.sku ?? "Unknown",
-    sku: item.Variant?.sku ?? "",
-    price: Number(item.unit_price),
+    productName: item.product_name || item.Variant?.Product?.name || "Unknown", 
+    variantName: item.variant_name || item.Variant?.sku || "Unknown",
+    sku: item.sku || item.Variant?.sku || "",
+    price: Number(item.unit_price || item.price || 0),
     quantity: item.quantity,
   })) ?? [];
 
