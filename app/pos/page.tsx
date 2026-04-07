@@ -458,6 +458,10 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
     
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminDetail');
+    localStorage.removeItem('pos_session_time');  
+    
+    OfflineInventoryManager.resetSnapshot();
+    
     router.push('/auth/login');
   };
 
@@ -679,6 +683,7 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
         onComplete={() => {
           handleResetCart(); 
           setShowCheckout(false);
+          refetchVariants();
         }}
         onWalkInCreated={async () => {
           await refetchWalkInCustomer();

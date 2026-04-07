@@ -19,21 +19,49 @@ export class OfflineInventoryManager {
    */
   static saveInventorySnapshot(variants: VariantWithProduct[]): void {
     try {
-      // Get current snapshot to preserve sold counts if they exist
-      const currentSnapshot = this.getSnapshot();
+      // 🔄 Get currently unsynced transactions to calculate accurate "sold" counts
+      // We don't import OfflineTransactionManager here to avoid circular dependencies
+      // but we can read from the same localStorage key
+      const unsyncedQtys: Record<number, number> = {};
+      try {
+        const offlineData = localStorage.getItem('pos_offline_transactions');
+        if (offlineData) {
+          interface MinimalOfflineTx {
+            synced: boolean;
+            transactionData?: {
+              items?: Array<{
+                variantId: number;
+                quantity: number;
+              }>;
+            };
+          }
+
+          const unsyncedTxns = JSON.parse(offlineData) as MinimalOfflineTx[];
+          unsyncedTxns.forEach(tx => {
+            if (!tx.synced && tx.transactionData?.items) {
+              tx.transactionData.items.forEach((item) => {
+                const vid = item.variantId;
+                unsyncedQtys[vid] = (unsyncedQtys[vid] || 0) + item.quantity;
+              });
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('⚠️ Failed to calculate unsynced quantities for snapshot:', e);
+      }
       
       const snapshot: OfflineInventorySnapshot[] = variants.map(v => {
-        const existing = currentSnapshot.find(s => s.variantId === v.variant_id);
         return {
           variantId: v.variant_id,
-          quantity: v.quantity, // This is the "available when last online" amount
-          sold: existing ? existing.sold : 0, // Preserve sold counter if it exists
+          quantity: v.quantity, // Latest truth from server
+          sold: unsyncedQtys[v.variant_id] || 0, // Recalculated from actual pending sales
           lastUpdated: new Date().toISOString(),
         };
       });
 
       localStorage.setItem(OFFLINE_INVENTORY_KEY, JSON.stringify(snapshot));
-      console.log(`📦 Offline inventory snapshot saved: ${snapshot.length} variants (preserved sold counts)`);
+      console.log(`📦 Offline inventory snapshot updated: ${snapshot.length} variants. ` + 
+                  `Tracked ${Object.keys(unsyncedQtys).length} variants with pending sales.`);
     } catch (error) {
       console.error('Error saving offline inventory snapshot:', error);
     }
