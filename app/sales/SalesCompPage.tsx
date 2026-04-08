@@ -174,8 +174,8 @@ export default function SalesPage() {
       const yesterdayStr = yesterday.toDateString();
       filtered = filtered.filter(t => new Date(t.timestamp).toDateString() === yesterdayStr);
     } else if (dateRange.filter === 'thisWeek') {
-      const now = new Date();
-      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+      const startOfWeek = new Date();
+      startOfWeek.setDate(startOfWeek.getDate() - 6);
       startOfWeek.setHours(0, 0, 0, 0);
       filtered = filtered.filter(t => new Date(t.timestamp) >= startOfWeek);
     } else if (dateRange.filter === 'thisMonth') {

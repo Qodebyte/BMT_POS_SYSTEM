@@ -22,8 +22,7 @@ export function DateFilter({ dateRange, onDateRangeChange }: DateFilterProps) {
   const filters = [
     { id: 'today', label: 'Today' },
     { id: 'yesterday', label: 'Yesterday' },
-    { id: 'last7', label: 'This Week' },
-    //  { id: 'thisWeek', label: 'This Week' },
+    { id: 'thisWeek', label: 'This Week' },
     { id: 'thisMonth', label: 'This Month' },
     { id: 'thisYear', label: 'This Year' },
     { id: 'custom', label: 'Custom' },
@@ -44,7 +43,7 @@ export function DateFilter({ dateRange, onDateRangeChange }: DateFilterProps) {
       endDate = yesterday.toISOString().split('T')[0];
     } else if (filterId === 'thisWeek') {
       const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - now.getDay());
+      startOfWeek.setDate(now.getDate() - 6);
       startDate = startOfWeek.toISOString().split('T')[0];
       endDate = now.toISOString().split('T')[0];
     } else if (filterId === 'thisMonth') {
