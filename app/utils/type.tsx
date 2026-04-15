@@ -402,8 +402,8 @@ export type Expense = {
   createdAt: string;
   updatedAt: string;
   expense_category?: { expense_category_id: string; name: string };
-  admin?: { id: string; email: string; full_name: string };
-
+  admin?: { id?: string; admin_id?: string; email: string; full_name: string };
+  approver?: { admin_id: string; full_name: string };
 };
 
 export interface CompanySettings {

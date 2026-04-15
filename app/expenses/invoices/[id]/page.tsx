@@ -278,7 +278,7 @@ const fetchExpenseDetail = async () => {
                     {expense.expense_approved_by && (
                       <div className="flex justify-between">
                         <span className="text-gray-400">Approved By:</span>
-                        <span>{expense.expense_approved_by}</span>
+                        <span>{expense.approver?.full_name || expense.expense_approved_by || 'System'}</span>
                       </div>
                     )}
                   </div>

@@ -342,6 +342,8 @@ const handleCompleteSale = async () => {
         : parseFloat(amountPaid) || 0
       : useInstallments
       ? getActualDownPayment()
+      : paymentMethod === 'split'
+      ? getSplitTotalPaid()
       : parseFloat(amountPaid) || 0,
 
  
@@ -362,7 +364,7 @@ const handleCompleteSale = async () => {
 
   downPayment: useInstallments ? getActualDownPayment() : 0,
 
-  change: paymentMethod === 'credit' ? 0 : calculateChange(),
+  change: paymentMethod === 'credit' ? 0 : (paymentMethod === 'split' ? (getSplitTotalPaid() > netTotal ? getSplitTotalPaid() - netTotal : 0) : calculateChange()),
 
   timestamp,
   createdOffline: true,
@@ -398,6 +400,14 @@ const handleCompleteSale = async () => {
       : 0,
     },
   }),
+  ...(paymentMethod === 'split' && {
+    splitPayments: splitPayments
+      .filter(p => (parseFloat(p.amount) || 0) > 0)
+      .map(p => ({
+        method: p.method,
+        amount: parseFloat(p.amount) || 0,
+      })),
+  }),
 } as Transaction;
 
   // Save to local storage (offline backup)
@@ -414,7 +424,7 @@ const handleCompleteSale = async () => {
     );
 
     installmentPlans.push({
-      id: transactionId,
+      id: newTransactionId,
       customer: customer,
       total: netTotal, 
       downPayment: getActualDownPayment(),
@@ -425,7 +435,7 @@ const handleCompleteSale = async () => {
       startDate: installmentPlan.startDate,
       payments: paymentSchedule,
       status: 'active',
-      transactionId: transactionId,  
+      transactionId: newTransactionId,  
       customerId: customer.id, 
     });
 
@@ -478,7 +488,7 @@ const handleCompleteSale = async () => {
           .map(p => ({
             method: p.method as 'cash' | 'card' | 'transfer' | 'split' | 'installment' | 'credit',
             amount: Math.round(parseFloat(p.amount) * 100) / 100, // Round to 2 decimals
-            reference: transactionId || undefined,
+            reference: newTransactionId || undefined,
           }))
       : [
           {
@@ -490,7 +500,7 @@ const handleCompleteSale = async () => {
               : paymentMethod === 'credit' 
                 ? (creditType === 'partial' ? Math.round((parseFloat(amountPaid) || 0) * 100) / 100 : 0) 
                 : Math.round((parseFloat(amountPaid) || 0) * 100) / 100,
-            reference: transactionId || undefined,
+            reference: newTransactionId || undefined,
           },
         ];
 
@@ -630,17 +640,20 @@ useEffect(() => {
   }
 }, [paymentMethod]);
 
-useEffect(() => {
-  if (
-    paymentMethod !== 'split' &&
-    !(paymentMethod === 'credit' && creditType === 'full')
-  ) {
-    setAmountPaid(netTotal.toFixed(2));
-  }
-  if (paymentMethod === 'credit' && creditType === 'full') {
-    setAmountPaid('0');
-  }
-}, [paymentMethod, creditType, netTotal]);
+  useEffect(() => {
+    if (
+      paymentMethod !== 'split' &&
+      !(paymentMethod === 'credit' && creditType === 'full')
+    ) {
+      setAmountPaid(netTotal.toFixed(2));
+    } else if (paymentMethod === 'split') {
+      setAmountPaid(getSplitTotalPaid().toFixed(2));
+    }
+
+    if (paymentMethod === 'credit' && creditType === 'full') {
+      setAmountPaid('0');
+    }
+  }, [paymentMethod, creditType, netTotal, open]);
 
   const calculateDueDate = (startDate: string, frequency: string, offset: number) => {
     const date = new Date(startDate);
