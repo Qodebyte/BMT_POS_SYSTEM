@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import {Clock, LogOut, User} from "lucide-react";
+import { Clock, LogOut, User } from "lucide-react";
 import { AdminDetail, CartItem, Customer, Draft, Product, ProductVariant } from '../utils/type';
 import { LoadDraftModal } from './components/LoadDraftModal';
 import { CreateCustomerModal } from './components/CreateCustomerModal';
@@ -38,7 +38,7 @@ export default function POSPage() {
 
     const savedSessionTime = parseInt(localStorage.getItem('pos_session_time') || '0', 10);
     setSessionTime(savedSessionTime);
-    
+
     OfflineTransactionManager.cleanupOldRetries();
     OfflineTransactionManager.cleanupLocalTransactions();
   }, []);
@@ -59,16 +59,16 @@ export default function POSPage() {
   const [filteredVariants, setFilteredVariants] = useState<VariantWithProduct[]>([]);
   const [allVariants, setAllVariants] = useState<VariantWithProduct[]>([]);
   const [adminData, setAdminData] = useState<AdminDetail | null>(null);
-   const [pendingSyncCount, setPendingSyncCount] = useState(0);
-      const navigation = [
-        { name: "Dashboard", href: "/dashboard", icon: Home, permissions: ["view_inventory","view_expenses","view_customer","view_staff","view_settings","view_login_attempts"] },
-        { name: "Inventory", href: "/inventory", icon: Package, permissions: ["view_inventory"] },
-        { name: "Sales", href: "/sales", icon: ShoppingCart, permissions: ["view_sales"] },
-        { name: "Finance", href: "/expenses", icon: DollarSign, permissions: ["view_expenses"] },
-        { name: "Customers", href: "/customers", icon: Users, permissions: ["view_customer"] },
-        { name: "Staffs", href: "/staffs", icon: Workflow, permissions: ["view_staff"] },
-        { name: "Settings", href: "/settings", icon: Settings, permissions: ["view_settings"] },
-      ];
+  const [pendingSyncCount, setPendingSyncCount] = useState(0);
+  const navigation = [
+    { name: "Dashboard", href: "/dashboard", icon: Home, permissions: ["view_inventory", "view_expenses", "view_customer", "view_staff", "view_settings", "view_login_attempts"] },
+    { name: "Inventory", href: "/inventory", icon: Package, permissions: ["view_inventory"] },
+    { name: "Sales", href: "/sales", icon: ShoppingCart, permissions: ["view_sales"] },
+    { name: "Finance", href: "/expenses", icon: DollarSign, permissions: ["view_expenses"] },
+    { name: "Customers", href: "/customers", icon: Users, permissions: ["view_customer"] },
+    { name: "Staffs", href: "/staffs", icon: Workflow, permissions: ["view_staff"] },
+    { name: "Settings", href: "/settings", icon: Settings, permissions: ["view_settings"] },
+  ];
 
   const { products } = useProducts();
   const { variants: variantsFromHook, refetch: refetchVariants } = useVariants();
@@ -88,32 +88,32 @@ export default function POSPage() {
 
   type DiscountMode = 'auto' | 'manual';
 
-const [discountMode, setDiscountMode] = useState<DiscountMode>('auto');
+  const [discountMode, setDiscountMode] = useState<DiscountMode>('auto');
 
-const [manualDiscount, setManualDiscount] = useState<{
-  type: 'fixed_amount' | 'percentage';
-  value: number;
-}>({
-  type: 'fixed_amount',
-  value: 0,
-});
+  const [manualDiscount, setManualDiscount] = useState<{
+    type: 'fixed_amount' | 'percentage';
+    value: number;
+  }>({
+    type: 'fixed_amount',
+    value: 0,
+  });
 
-const calculateManualDiscount = () => {
-  if (manualDiscount.value <= 0) return 0;
+  const calculateManualDiscount = () => {
+    if (manualDiscount.value <= 0) return 0;
 
-  if (manualDiscount.type === 'percentage') {
-    return (calculateSubtotal() * manualDiscount.value) / 100;
-  }
+    if (manualDiscount.type === 'percentage') {
+      return (calculateSubtotal() * manualDiscount.value) / 100;
+    }
 
-  return Math.min(manualDiscount.value, calculateSubtotal());
-};
+    return Math.min(manualDiscount.value, calculateSubtotal());
+  };
 
 
 
 
 
   useEffect(() => {
-      const storedAdminData = localStorage.getItem('adminDetail');
+    const storedAdminData = localStorage.getItem('adminDetail');
     if (storedAdminData) {
       try {
         const parsedAdminData: AdminDetail = JSON.parse(storedAdminData);
@@ -132,7 +132,7 @@ const calculateManualDiscount = () => {
     setIsHydrated(true);
   }, []);
 
- 
+
   useEffect(() => {
     setAllVariants(variantsFromHook);
     // 📦 Save inventory snapshot for offline validation
@@ -141,26 +141,34 @@ const calculateManualDiscount = () => {
     }
   }, [variantsFromHook]);
 
-    useEffect(() => {
+  useEffect(() => {
 
     const checkPendingTransactions = () => {
       const unsyncedTxns = OfflineTransactionManager.getUnsyncedTransactions();
       setPendingSyncCount(unsyncedTxns.length);
     };
 
-  
+
     checkPendingTransactions();
 
-   
+
     const interval = setInterval(checkPendingTransactions, 5000);
 
-   
-    window.addEventListener('online', checkPendingTransactions);
+
+    const handleRestoreConnection = () => {
+      checkPendingTransactions();
+      if (navigator.onLine) {
+        console.log('📡 System back online, refreshing inventory truth...');
+        refetchVariants();
+      }
+    };
+
+    window.addEventListener('online', handleRestoreConnection);
     window.addEventListener('offline', checkPendingTransactions);
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener('online', checkPendingTransactions);
+      window.removeEventListener('online', handleRestoreConnection);
       window.removeEventListener('offline', checkPendingTransactions);
     };
   }, []);
@@ -178,7 +186,7 @@ const calculateManualDiscount = () => {
 
         }
       }
-    }, 30000);
+    }, 15000);
 
     return () => clearInterval(stockRefreshInterval);
   }, [refetchVariants]);
@@ -229,7 +237,7 @@ const calculateManualDiscount = () => {
         return next;
       });
     }, 1000);
-    
+
     return () => clearInterval(timer);
   }, []);
 
@@ -242,50 +250,49 @@ const calculateManualDiscount = () => {
 
 
   const getVariantImage = (image_url?: unknown): string | undefined => {
-  const images = parseImageUrl(image_url as string | { url: string }[] | undefined);
-  if (!images.length) return undefined;
+    const images = parseImageUrl(image_url as string | { url: string }[] | undefined);
+    if (!images.length) return undefined;
 
-  return images[0].url;
-}
+    return images[0].url;
+  }
 
   const handleAddToCart = (variant: VariantWithProduct) => {
     const existingItem = cart.find(item => item.variantId === variant.variant_id);
 
     const discount = getDiscountForProduct(variant.product_id);
-    
-   
-    if (!navigator.onLine) {
-      const currentQtyInCart = existingItem ? existingItem.quantity : 0;
-      const offlineCheck = OfflineInventoryManager.canAddToCart(
-        variant.variant_id, 
-        currentQtyInCart + 1
-      );
-      
-      if (!offlineCheck.canAdd) {
-        toast.error(offlineCheck.reason || 'Cannot add item: offline inventory limit reached');
-        return;
-      }
+
+
+    // 📦 Check offline inventory manager for available stock (taking into account unsynced local sales)
+    const currentQtyInCart = existingItem ? existingItem.quantity : 0;
+    const offlineCheck = OfflineInventoryManager.canAddToCart(
+      variant.variant_id,
+      currentQtyInCart + 1
+    );
+
+    if (!offlineCheck.canAdd) {
+      toast.error(offlineCheck.reason || 'Cannot add item: local inventory limit reached (includes unsynced sales)');
+      return;
     }
-    
+
     if (existingItem) {
-    
+
       if (existingItem.quantity + 1 > variant.quantity) {
         toast.error(`⚠️ Only ${variant.quantity} items available. Already have ${existingItem.quantity} in cart.`);
         return;
       }
-      
+
       setCart(cart.map(item =>
         item.variantId === variant.variant_id
           ? { ...item, quantity: item.quantity + 1 }
           : item
       ));
     } else {
- 
+
       if (variant.quantity <= 0) {
         toast.error(`❌ ${variant.product_name} is out of stock`);
         return;
       }
-      
+
       setCart([
         ...cart,
         {
@@ -298,20 +305,20 @@ const calculateManualDiscount = () => {
           price: parseFloat(String(variant.selling_price)),
           quantity: 1,
           taxable: variant.taxable,
-      image: (() => {
-  const img = getVariantImage(variant.image_url);
-  if (!img) return undefined;
+          image: (() => {
+            const img = getVariantImage(variant.image_url);
+            if (!img) return undefined;
 
-  if (img.startsWith("http")) return img;
+            if (img.startsWith("http")) return img;
 
-  const base =
-    process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.bmtpossystem.com";
+            const base =
+              process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.bmtpossystem.com";
 
-  return img.startsWith("/") ? `${base}${img}` : `${base}/${img}`;
-})(),
+            return img.startsWith("/") ? `${base}${img}` : `${base}/${img}`;
+          })(),
 
           stock: variant.quantity,
-        productDiscount: discount ? {
+          productDiscount: discount ? {
             id: discount.id,
             name: discount.name,
             type: discount.discount_type,
@@ -331,23 +338,24 @@ const calculateManualDiscount = () => {
       setCart(cart.filter(item => item.id !== itemId));
     } else {
       const cartItem = cart.find(item => item.id === itemId);
-    
+
       const variant = allVariants.find(v => v.variant_id === cartItem?.variantId);
-      
+
       if (!variant) {
         toast.error('❌ Product not found in inventory');
         return;
       }
 
-    
-      if (!navigator.onLine && cartItem) {
+
+      // 📦 Always check local inventory manager (accounts for server stock - pending local sales)
+      if (cartItem) {
         const offlineCheck = OfflineInventoryManager.canAddToCart(cartItem.variantId, newQuantity);
         if (!offlineCheck.canAdd) {
-          toast.error(offlineCheck.reason || 'Cannot update quantity: offline inventory limit reached');
+          toast.error(offlineCheck.reason || 'Cannot update quantity: local inventory limit reached');
           return;
         }
       }
-      
+
       if (newQuantity > variant.quantity) {
         toast.error(`⚠️ Only ${variant.quantity} items available in stock. Unable to set quantity to ${newQuantity}`);
         return;
@@ -362,18 +370,18 @@ const calculateManualDiscount = () => {
   };
 
   const handleRemoveFromCart = (itemId: string) => {
-  
+
     const itemToRemove = cart.find(item => item.id === itemId);
     if (itemToRemove && !navigator.onLine) {
-      OfflineInventoryManager.reverseOfflineSale(
+      OfflineInventoryManager.reverseLocalSale(
         itemToRemove.variantId,
         itemToRemove.quantity
       );
       console.log(
-        `↩️ Reversed offline sale: ${itemToRemove.productName} (qty: ${itemToRemove.quantity})`
+        `↩️ Reversed local sale: ${itemToRemove.productName} (qty: ${itemToRemove.quantity})`
       );
     }
-    
+
     setCart(cart.filter(item => item.id !== itemId));
   };
 
@@ -403,7 +411,7 @@ const calculateManualDiscount = () => {
     return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   };
 
- const calculateTax = () => {
+  const calculateTax = () => {
     const taxableItems = cart.filter(item => item.taxable);
     return taxableItems.reduce((sum, item) => sum + (item.price * item.quantity * (taxRate / 100)), 0);
   };
@@ -432,24 +440,24 @@ const calculateManualDiscount = () => {
     }, 0);
   };
 
-const autoDiscount =
-  discountMode === 'auto' ? calculateDiscount() : 0;
+  const autoDiscount =
+    discountMode === 'auto' ? calculateDiscount() : 0;
 
-const manualDiscountAmount =
-  discountMode === 'manual' ? calculateManualDiscount() : 0;
+  const manualDiscountAmount =
+    discountMode === 'manual' ? calculateManualDiscount() : 0;
 
-const totalDiscount = autoDiscount + manualDiscountAmount;
+  const totalDiscount = autoDiscount + manualDiscountAmount;
 
-const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
+  const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
 
- const router = useRouter();
+  const router = useRouter();
 
   const handleSignOut = async () => {
     if (navigator.onLine) {
       const unsyncedTxns = OfflineTransactionManager.getUnsyncedTransactions();
       if (unsyncedTxns.length > 0) {
         const confirmSync = window.confirm(`You have ${unsyncedTxns.length} unsynced transaction(s). Do you want to sync them before signing out?`);
-        
+
         if (confirmSync) {
           const syncToastId = toast.loading('Syncing transactions before sign out...');
           try {
@@ -461,15 +469,15 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
         }
       }
     }
-    
+
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminDetail');
-    localStorage.removeItem('pos_session_time');  
+    localStorage.removeItem('pos_session_time');
     setSessionTime(0);
     setCart([]);
-    
+
     OfflineInventoryManager.resetSnapshot();
-    
+
     router.push('/auth/login');
   };
 
@@ -478,12 +486,12 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
 
   const handleBarcodeScanned = async (barcode: string) => {
     setIsScannerProcessing(true);
-    
+
     try {
-    
+
       const trimmedBarcode = barcode.trim().toLowerCase();
       const variant = allVariants.find(v => v.barcode.trim().toLowerCase() === trimmedBarcode);
-      
+
       if (!variant) {
         toast.error(`Barcode not found: ${barcode}`);
         setIsScannerProcessing(false);
@@ -504,14 +512,12 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
         return;
       }
 
-      // 📦 Check offline inventory snapshot (prevents overselling while offline)
-      if (!navigator.onLine) {
-        const offlineCheck = OfflineInventoryManager.canAddToCart(variant.variant_id, newQuantity);
-        if (!offlineCheck.canAdd) {
-          toast.error(offlineCheck.reason || 'Cannot add item: offline inventory limit reached');
-          setIsScannerProcessing(false);
-          return;
-        }
+      // 📦 Always check local inventory snapshot (prevents overselling by accounting for pending local sales)
+      const offlineCheck = OfflineInventoryManager.canAddToCart(variant.variant_id, newQuantity);
+      if (!offlineCheck.canAdd) {
+        toast.error(offlineCheck.reason || 'Cannot add item: local inventory limit reached');
+        setIsScannerProcessing(false);
+        return;
       }
 
       // ✅ All validations passed - add/update item
@@ -537,7 +543,7 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
     );
   }
 
-    const cashierName = adminData?.full_name || 'Cashier';
+  const cashierName = adminData?.full_name || 'Cashier';
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -545,7 +551,7 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <NetworkStatus />
-         
+
             <PageDropDown
               pages={navigation.filter(item =>
                 !item.permissions || hasPermission(adminData?.permissions, item.permissions)
@@ -555,7 +561,7 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
               <Clock className="h-4 w-4" />
               Session: {formatTime(sessionTime)}
             </div>
-              {pendingSyncCount > 0 && (
+            {pendingSyncCount > 0 && (
               <Badge variant="outline" className="bg-amber-50 border-amber-300 text-amber-800">
                 ⏳ {pendingSyncCount} pending sync{pendingSyncCount !== 1 ? 's' : ''}
               </Badge>
@@ -578,17 +584,17 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
               />
               <span className="text-sm hidden">%</span>
             </div>
-             <button
-            onClick={handleSignOut}
-            className="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-red-600 hover:bg-gray-800 hover:text-red-400 rounded-lg transition-colors mt-2"
-          >
-            <LogOut className="h-5 w-5" />
-            Sign Out
-          </button>
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-red-600 hover:bg-gray-800 hover:text-red-400 rounded-lg transition-colors mt-2"
+            >
+              <LogOut className="h-5 w-5" />
+              Sign Out
+            </button>
           </div>
-          
-          <Button 
-            variant="secondary" 
+
+          <Button
+            variant="secondary"
             size="sm"
             asChild
           >
@@ -602,7 +608,7 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
       <div className="flex flex-col lg:flex-row h-[calc(100vh-73px)]">
         <div className="flex-1 overflow-hidden flex flex-col">
           <POSHeader />
-          
+
           <ProductFilters
             products={products}
             selectedBrand={selectedBrand}
@@ -615,20 +621,20 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
             onSearchChange={setSearchQuery}
             onVariantsChange={setFilteredVariants}
           />
-            
+
           <ProductGrid
             variants={filteredVariants}
             onAddToCart={handleAddToCart}
           />
 
           <div className="px-6 pt-4">
-            <BarcodeScanner 
+            <BarcodeScanner
               onBarcodeScanned={handleBarcodeScanned}
               isProcessing={isScannerProcessing}
             />
           </div>
         </div>
-        
+
         <div className="lg:w-96 xl:w-108 border-l border-gray-200 bg-white overflow-y-auto">
           <CartSidebar
             cart={cart}
@@ -642,12 +648,12 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
             subtotal={calculateSubtotal()}
             taxRate={taxRate}
             tax={calculateTax()}
-            total={calculateTotal()} 
+            total={calculateTotal()}
             onCreateCustomer={() => setShowCreateCustomer(true)}
-            purchaseType={purchaseType}                 
-            onPurchaseTypeChange={setPurchaseType} 
+            purchaseType={purchaseType}
+            onPurchaseTypeChange={setPurchaseType}
             itemDiscountToggles={itemDiscountToggles}
-            onDiscountToggle={handleToggleDiscount} 
+            onDiscountToggle={handleToggleDiscount}
             discountMode={discountMode}
             onDiscountModeChange={setDiscountMode}
             manualDiscount={manualDiscount}
@@ -664,7 +670,7 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
           setShowCreateCustomer(false);
         }}
       />
-        
+
       <LoadDraftModal
         open={showLoadDraft}
         onOpenChange={setShowLoadDraft}
@@ -674,7 +680,7 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
           setShowLoadDraft(false);
         }}
       />
-        
+
       <CheckoutModal
         open={showCheckout}
         onOpenChange={setShowCheckout}
@@ -682,14 +688,14 @@ const finalTotal = Math.max(0, calculateTotal() - totalDiscount);
         customer={selectedCustomer}
         subtotal={calculateSubtotal()}
         tax={calculateTax()}
-        taxRate={taxRate} 
+        taxRate={taxRate}
         total={calculateTotal()}
-        totalDiscount={totalDiscount} 
-        itemDiscountToggles={itemDiscountToggles} 
+        totalDiscount={totalDiscount}
+        itemDiscountToggles={itemDiscountToggles}
         purchaseType={purchaseType}
         allVariants={allVariants}
         onComplete={() => {
-          handleResetCart(); 
+          handleResetCart();
           setShowCheckout(false);
           refetchVariants();
         }}

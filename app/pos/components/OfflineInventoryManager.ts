@@ -90,9 +90,10 @@ export class OfflineInventoryManager {
     const variant = snapshot.find(v => v.variantId === variantId);
 
     if (!variant) {
-      // No snapshot - assume unlimited (shouldn't happen, but fail-safe)
-      console.warn(`⚠️ No offline inventory data for variant ${variantId}. Allowing sale.`);
-      return { available: Infinity, sold: 0, original: 0 };
+      // 🚨 No snapshot - this is a risk. We should return 0 available to be safe, 
+      // or at least not Infinity. Let's assume 0 available if we have no inventory record.
+      console.warn(`⚠️ No offline inventory data for variant ${variantId}. Blocking sale for safety.`);
+      return { available: 0, sold: 0, original: 0 };
     }
 
     const available = variant.quantity - variant.sold;
@@ -102,6 +103,7 @@ export class OfflineInventoryManager {
       original: variant.quantity,
     };
   }
+
 
   /**
    * Check if adding quantity to cart would exceed offline inventory
@@ -123,13 +125,13 @@ export class OfflineInventoryManager {
    * Record a sale to update the snapshot
    * Called when a transaction is saved offline
    */
-  static recordOfflineSale(variantId: number, quantity: number): boolean {
+  static recordLocalSale(variantId: number, quantity: number): boolean {
     try {
       const snapshot = this.getSnapshot();
       const variant = snapshot.find(v => v.variantId === variantId);
 
       if (!variant) {
-        console.warn(`⚠️ Cannot record sale: variant ${variantId} not in snapshot`);
+        console.warn(`⚠️ Cannot record sale: variant ${variantId} not in local inventory snapshot`);
         return false;
       }
 
@@ -137,17 +139,17 @@ export class OfflineInventoryManager {
       if (variant.sold + quantity > variant.quantity) {
         console.error(
           `❌ Cannot record sale: would exceed limits. ` +
-          `Available: ${variant.quantity}, Already sold: ${variant.sold}, Requesting: ${quantity}`
+          `Available Server Stock: ${variant.quantity}, Already Sold Locally: ${variant.sold}, Requesting: ${quantity}`
         );
         return false;
       }
 
       variant.sold += quantity;
       localStorage.setItem(OFFLINE_INVENTORY_KEY, JSON.stringify(snapshot));
-      console.log(`📦 Recorded offline sale: variant ${variantId}, qty ${quantity}, total sold: ${variant.sold}/${variant.quantity}`);
+      console.log(`📦 Recorded local sale for variant ${variantId}: qty ${quantity}, total sold in current session: ${variant.sold}/${variant.quantity}`);
       return true;
     } catch (error) {
-      console.error('Error recording offline sale:', error);
+      console.error('Error recording local sale:', error);
       return false;
     }
   }
@@ -155,7 +157,7 @@ export class OfflineInventoryManager {
   /**
    * Reverse a sale (e.g., when user removes item from cart)
    */
-  static reverseOfflineSale(variantId: number, quantity: number): void {
+  static reverseLocalSale(variantId: number, quantity: number): void {
     try {
       const snapshot = this.getSnapshot();
       const variant = snapshot.find(v => v.variantId === variantId);
@@ -164,9 +166,9 @@ export class OfflineInventoryManager {
 
       variant.sold = Math.max(0, variant.sold - quantity);
       localStorage.setItem(OFFLINE_INVENTORY_KEY, JSON.stringify(snapshot));
-      console.log(`↩️ Reversed offline sale: variant ${variantId}, qty ${quantity}, total sold: ${variant.sold}/${variant.quantity}`);
+      console.log(`↩️ Reversed local sale: variant ${variantId}, qty ${quantity}, total sold: ${variant.sold}/${variant.quantity}`);
     } catch (error) {
-      console.error('Error reversing offline sale:', error);
+      console.error('Error reversing local sale:', error);
     }
   }
 

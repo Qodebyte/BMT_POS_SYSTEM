@@ -455,30 +455,32 @@ const handleCompleteSale = async () => {
     if (!navigator.onLine) {
       setSyncStatus('offline');
       
-      // 📦 Record offline inventory sales to prevent overselling when offline
-      let inventoryRecorded = true;
-      for (const item of cart) {
-        const recorded = OfflineInventoryManager.recordOfflineSale(item.variantId, item.quantity);
-        if (!recorded) {
-          inventoryRecorded = false;
-          toast.error(
-            `⚠️ Cannot save sale: ${item.productName} exceeds offline inventory limit`,
-            { description: 'Please remove some items and try again.' }
-          );
-          setSyncStatus('error');
-          return;
-        }
-      }
-      
-      if (inventoryRecorded) {
-        OfflineTransactionManager.addTransaction(transaction as Transaction);
-        toast.info('🔴 Offline Mode', {
-          description: 'Transaction saved offline. Will sync when online.',
+    // 📦 Record local inventory sale immediately to prevent overselling while sync/refresh is pending
+    let inventoryValid = true;
+    for (const item of cart) {
+      const recorded = OfflineInventoryManager.recordLocalSale(item.variantId, item.quantity);
+      if (!recorded) {
+        inventoryValid = false;
+        toast.error(`⚠️ Stock Conflict: ${item.productName} exceeds available limit`, {
+          description: 'This item might have been sold in another pending transaction.'
         });
-        setShowReceipt(true);
+        break;
       }
-      return;
     }
+  
+    if (inventoryValid) {
+      // 📦 Also add to the formal offline sync queue
+      OfflineTransactionManager.addTransaction(transaction as Transaction);
+    
+      toast.info('🔴 Offline Mode', {
+        description: 'Transaction saved offline. Will sync when online.',
+      });
+      setShowReceipt(true);
+    } else {
+      setSyncStatus('error');
+    }
+    return;
+  }
 
     // Prepare payload for backend
     // Build payments array - for split payments, include all methods; for others, single payment
@@ -553,6 +555,12 @@ const handleCompleteSale = async () => {
 
     // Call backend API
     const result: SaleResponse = await createSale(salePayload);
+
+    // 📦 Record local inventory sale immediately (even for online success) 
+    // to prevent overselling until the next automated refetch update
+    for (const item of cart) {
+      OfflineInventoryManager.recordLocalSale(item.variantId, item.quantity);
+    }
 
     setSyncStatus('success');
     
